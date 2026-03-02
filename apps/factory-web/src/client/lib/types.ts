@@ -3,6 +3,34 @@ export type RunStatus = "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "CANCELE
 export type AttractorScope = "PROJECT" | "GLOBAL";
 export type EnvironmentKind = "KUBERNETES_JOB";
 export type RunQuestionStatus = "PENDING" | "ANSWERED" | "TIMEOUT";
+export type TaskTemplateEnvironmentMode = "PROJECT_DEFAULT" | "NAMED";
+export type TaskTemplateLaunchMode = "MANUAL" | "SCHEDULE" | "EVENT" | "REPLAY";
+export type AgentScope = "GLOBAL" | "PROJECT";
+export type AgentMessageRole = "USER" | "ASSISTANT" | "SYSTEM";
+export type AgentActionStatus = "PENDING" | "EXECUTED" | "REJECTED" | "FAILED";
+export type AgentActionRisk = "LOW" | "HIGH";
+export type TaskTemplateTriggerEvent =
+  | "GITHUB_ISSUE_OPENED"
+  | "GITHUB_ISSUE_REOPENED"
+  | "GITHUB_ISSUE_LABELED"
+  | "GITHUB_ISSUE_COMMENT_CREATED"
+  | "GITHUB_PR_OPENED"
+  | "GITHUB_PR_SYNCHRONIZE"
+  | "GITHUB_PR_MERGED"
+  | "GITHUB_PR_REVIEW_CHANGES_REQUESTED"
+  | "GITHUB_PR_REVIEW_COMMENT_CREATED";
+export type TaskTemplateBranchStrategy = "TEMPLATE_DEFAULT" | "ISSUE_BRANCH" | "PR_HEAD";
+
+export interface TaskTemplateTriggerRule {
+  id: string;
+  enabled: boolean;
+  event: TaskTemplateTriggerEvent;
+  branchStrategy: TaskTemplateBranchStrategy;
+  labelAny?: string[];
+  commentContainsAny?: string[];
+  baseBranchAny?: string[];
+  headBranchAny?: string[];
+}
 
 export interface EnvironmentResources {
   requests?: {
@@ -20,6 +48,7 @@ export interface Environment {
   name: string;
   kind: EnvironmentKind;
   runnerImage: string;
+  setupScript: string | null;
   serviceAccountName: string | null;
   resourcesJson: EnvironmentResources | null;
   active: boolean;
@@ -32,6 +61,7 @@ export interface RunExecutionEnvironment {
   name: string;
   kind: EnvironmentKind;
   runnerImage: string;
+  setupScript?: string;
   serviceAccountName?: string;
   resources?: EnvironmentResources;
 }
@@ -75,6 +105,52 @@ export interface Project {
   repoFullName: string | null;
   defaultBranch: string | null;
   defaultEnvironmentId: string | null;
+  redeployAttractorId: string | null;
+  redeploySourceBranch: string | null;
+  redeployTargetBranch: string | null;
+  redeployEnvironmentId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AgentSession {
+  id: string;
+  scope: AgentScope;
+  projectId: string | null;
+  title: string;
+  createdByEmail: string | null;
+  archivedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  lastMessagePreview?: string | null;
+  pendingActionCount?: number;
+}
+
+export interface AgentMessage {
+  id: string;
+  sessionId: string;
+  role: AgentMessageRole;
+  content: string;
+  partsJson: unknown | null;
+  tokenUsageJson: unknown | null;
+  createdAt: string;
+}
+
+export interface AgentAction {
+  id: string;
+  sessionId: string;
+  messageId: string | null;
+  type: string;
+  risk: AgentActionRisk;
+  status: AgentActionStatus;
+  summary: string;
+  argsJson: unknown;
+  resultJson: unknown | null;
+  error: string | null;
+  requestedByEmail: string | null;
+  resolvedByEmail: string | null;
+  requestedAt: string;
+  resolvedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -183,6 +259,8 @@ export interface Run {
   id: string;
   projectId: string;
   attractorDefId: string;
+  taskTemplateId: string | null;
+  taskTemplateLaunchMode: TaskTemplateLaunchMode | null;
   attractorContentPath: string | null;
   attractorContentVersion: number | null;
   attractorContentSha256: string | null;
@@ -248,13 +326,88 @@ export interface GitHubPullQueueItem {
   pullRequest: GitHubPullRequest & { linkedIssue?: GitHubIssue | null };
   linkedRunId: string | null;
   reviewDecision: ReviewDecision | null;
-  reviewStatus: "Pending" | "Completed" | "Overdue";
+  reviewStatus: "Pending" | "Completed" | "Overdue" | "Stale";
+  stale: boolean;
+  staleReason: string | null;
   risk: "low" | "medium" | "high";
   dueAt: string;
   minutesRemaining: number;
   criticalCount: number;
   artifactCount: number;
   openPackPath: string | null;
+}
+
+export interface GlobalTaskTemplate {
+  id: string;
+  name: string;
+  attractorName: string;
+  runType: RunType;
+  sourceBranch: string | null;
+  targetBranch: string | null;
+  environmentMode: TaskTemplateEnvironmentMode;
+  environmentName: string | null;
+  scheduleEnabled: boolean;
+  scheduleCron: string | null;
+  scheduleTimezone: string | null;
+  triggersJson: TaskTemplateTriggerRule[] | null;
+  description: string | null;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TaskTemplate {
+  id: string;
+  projectId: string;
+  scope: AttractorScope;
+  name: string;
+  attractorName: string;
+  runType: RunType;
+  sourceBranch: string | null;
+  targetBranch: string | null;
+  environmentMode: TaskTemplateEnvironmentMode;
+  environmentName: string | null;
+  scheduleEnabled: boolean;
+  scheduleCron: string | null;
+  scheduleTimezone: string | null;
+  scheduleNextRunAt: string | null;
+  scheduleLastRunAt: string | null;
+  scheduleLastError: string | null;
+  triggersJson: TaskTemplateTriggerRule[] | null;
+  description: string | null;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TaskTemplateEventLedgerRecord {
+  id: string;
+  projectId: string;
+  taskTemplateId: string;
+  runId: string | null;
+  eventName: string;
+  eventAction: string | null;
+  dedupeKey: string;
+  deliveryId: string | null;
+  entityType: string | null;
+  entityNumber: number | null;
+  matchedRuleIds: string[] | null;
+  payload: unknown;
+  status: string;
+  reason: string | null;
+  replayedAt: string | null;
+  createdAt: string;
+}
+
+export interface GitHubPullLaunchDefaults {
+  sourceBranch: string;
+  targetBranch: string;
+  attractorOptions: Array<{
+    id: string;
+    name: string;
+    defaultRunType: "planning" | "implementation" | "task";
+    modelConfig: RunModelConfig | null;
+  }>;
 }
 
 export interface RunQuestion {

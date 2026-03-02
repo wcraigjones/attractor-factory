@@ -103,6 +103,19 @@ Provider/model API keys are configured from:
 - UI: Global Secrets / Project Secrets
 - CLI fallback scripts in `scripts/`
 
+Optional Google SSO gate can be enabled by setting all four Helm values:
+
+- `auth.googleClientId`
+- `auth.googleClientSecret`
+- `auth.allowedDomain`
+- `auth.sessionSecret`
+
+Notes:
+
+- Leaving all four empty keeps Factory open.
+- Setting only some values causes `factory-api` and `factory-web` to fail startup.
+- With auth enabled, only `GET /healthz` and `POST /api/github/webhooks` stay public.
+
 ## Self-Bootstrap a Factory Project
 
 Example:

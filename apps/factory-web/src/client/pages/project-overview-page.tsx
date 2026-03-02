@@ -14,7 +14,8 @@ import {
   listProjectSecrets,
   setProjectDefaultEnvironment,
   startGitHubAppInstallation,
-  startGitHubAppManifestSetup
+  startGitHubAppManifestSetup,
+  updateProjectRedeployDefaults
 } from "../lib/api";
 import { buildEffectiveAttractors } from "../lib/attractors-view";
 import { getInactiveDefaultEnvironment, listActiveEnvironments } from "../lib/environments-view";
@@ -24,6 +25,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+
+const NONE_SELECT_VALUE = "__none__";
 
 function submitGitHubManifestForm(input: {
   manifestUrl: string;
@@ -62,6 +65,10 @@ export function ProjectOverviewPage() {
   const [defaultBranch, setDefaultBranch] = useState("main");
   const [selectedRepoFullName, setSelectedRepoFullName] = useState("");
   const [selectedDefaultEnvironmentId, setSelectedDefaultEnvironmentId] = useState("");
+  const [redeployAttractorId, setRedeployAttractorId] = useState("");
+  const [redeploySourceBranch, setRedeploySourceBranch] = useState("");
+  const [redeployTargetBranch, setRedeployTargetBranch] = useState("");
+  const [redeployEnvironmentId, setRedeployEnvironmentId] = useState("");
 
   const projectsQuery = useQuery({ queryKey: ["projects"], queryFn: listProjects });
   const githubAppStatusQuery = useQuery({ queryKey: ["github-app-status"], queryFn: getGitHubAppStatus });
@@ -96,9 +103,14 @@ export function ProjectOverviewPage() {
     enabled: projectId.length > 0 && !!project?.githubInstallationId
   });
 
-  const effectiveAttractorCount = useMemo(
-    () => buildEffectiveAttractors(attractorsQuery.data ?? []).length,
+  const effectiveAttractors = useMemo(
+    () => buildEffectiveAttractors(attractorsQuery.data ?? []),
     [attractorsQuery.data]
+  );
+  const effectiveAttractorCount = effectiveAttractors.length;
+  const redeployAttractorOptions = useMemo(
+    () => effectiveAttractors.filter((attractor) => attractor.active && !!attractor.contentPath),
+    [effectiveAttractors]
   );
   const installationRepos = reposQuery.data?.repos ?? [];
 
@@ -147,6 +159,26 @@ export function ProjectOverviewPage() {
     }
   });
 
+  const redeployDefaultsMutation = useMutation({
+    mutationFn: () =>
+      updateProjectRedeployDefaults(projectId, {
+        redeployAttractorId: redeployAttractorId.trim().length > 0 ? redeployAttractorId.trim() : null,
+        redeploySourceBranch:
+          redeploySourceBranch.trim().length > 0 ? redeploySourceBranch.trim() : null,
+        redeployTargetBranch:
+          redeployTargetBranch.trim().length > 0 ? redeployTargetBranch.trim() : null,
+        redeployEnvironmentId:
+          redeployEnvironmentId.trim().length > 0 ? redeployEnvironmentId.trim() : null
+      }),
+    onSuccess: () => {
+      toast.success("Redeploy defaults saved");
+      void queryClient.invalidateQueries({ queryKey: ["projects"] });
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : String(error));
+    }
+  });
+
   const defaultEnvironment = (environmentsQuery.data ?? []).find(
     (environment) => environment.id === project?.defaultEnvironmentId
   );
@@ -168,6 +200,18 @@ export function ProjectOverviewPage() {
     }
     if ((defaultBranch === "main" || !defaultBranch) && project.defaultBranch) {
       setDefaultBranch(project.defaultBranch);
+    }
+    if (!redeployAttractorId && project.redeployAttractorId) {
+      setRedeployAttractorId(project.redeployAttractorId);
+    }
+    if (!redeploySourceBranch && project.redeploySourceBranch) {
+      setRedeploySourceBranch(project.redeploySourceBranch);
+    }
+    if (!redeployTargetBranch && project.redeployTargetBranch) {
+      setRedeployTargetBranch(project.redeployTargetBranch);
+    }
+    if (!redeployEnvironmentId && project.redeployEnvironmentId) {
+      setRedeployEnvironmentId(project.redeployEnvironmentId);
     }
   }, [project, installationId, repoFullName, defaultBranch]);
 
@@ -405,6 +449,12 @@ export function ProjectOverviewPage() {
             <p>
               <span className="text-muted-foreground">Environment:</span> {defaultEnvironment?.name ?? "-"}
             </p>
+            <p>
+              <span className="text-muted-foreground">Redeploy attractor:</span>{" "}
+              {redeployAttractorOptions.find((item) => item.id === project.redeployAttractorId)?.name ??
+                project.redeployAttractorId ??
+                "-"}
+            </p>
           </CardContent>
         </Card>
 
@@ -443,6 +493,89 @@ export function ProjectOverviewPage() {
               disabled={setDefaultEnvironmentMutation.isPending || !effectiveDefaultEnvironmentId}
             >
               {setDefaultEnvironmentMutation.isPending ? "Saving..." : "Save Default Environment"}
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Redeploy Defaults</CardTitle>
+            <CardDescription>
+              Used by Project Chat command <span className="mono">redeploy this project</span>.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="space-y-1">
+              <Label>Attractor</Label>
+              <Select
+                value={redeployAttractorId || NONE_SELECT_VALUE}
+                onValueChange={(value) =>
+                  setRedeployAttractorId(value === NONE_SELECT_VALUE ? "" : value)
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select attractor" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE_SELECT_VALUE}>No attractor selected</SelectItem>
+                  {redeployAttractorOptions.map((attractor) => (
+                    <SelectItem key={attractor.id} value={attractor.id}>
+                      {attractor.scope === "PROJECT" ? attractor.name : `${attractor.name} (global)`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="redeploy-source-branch">Source Branch</Label>
+              <Input
+                id="redeploy-source-branch"
+                value={redeploySourceBranch}
+                onChange={(event) => setRedeploySourceBranch(event.target.value)}
+                placeholder={project.defaultBranch ?? "main"}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="redeploy-target-branch">Target Branch</Label>
+              <Input
+                id="redeploy-target-branch"
+                value={redeployTargetBranch}
+                onChange={(event) => setRedeployTargetBranch(event.target.value)}
+                placeholder="attractor/redeploy"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label>Environment (Optional)</Label>
+              <Select
+                value={redeployEnvironmentId || NONE_SELECT_VALUE}
+                onValueChange={(value) =>
+                  setRedeployEnvironmentId(value === NONE_SELECT_VALUE ? "" : value)
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Use project default environment" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE_SELECT_VALUE}>Use project default environment</SelectItem>
+                  {activeEnvironments.map((environment) => (
+                    <SelectItem key={environment.id} value={environment.id}>
+                      {environment.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              onClick={() => {
+                if (!redeployAttractorId.trim() || !redeploySourceBranch.trim() || !redeployTargetBranch.trim()) {
+                  toast.error("Attractor, source branch, and target branch are required");
+                  return;
+                }
+                redeployDefaultsMutation.mutate();
+              }}
+              disabled={redeployDefaultsMutation.isPending}
+            >
+              {redeployDefaultsMutation.isPending ? "Saving..." : "Save Redeploy Defaults"}
             </Button>
           </CardContent>
         </Card>

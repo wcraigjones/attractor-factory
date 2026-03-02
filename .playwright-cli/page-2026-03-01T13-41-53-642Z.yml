@@ -1,0 +1,79 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e5]:
+        - paragraph [ref=e6]: Attractor
+        - heading "Factory" [level=1] [ref=e7]
+      - navigation [ref=e8]:
+        - link "Dashboard" [ref=e9] [cursor=pointer]:
+          - /url: /
+        - link "Projects" [ref=e10] [cursor=pointer]:
+          - /url: /projects
+        - generic [ref=e11]:
+          - link "Overview" [ref=e12] [cursor=pointer]:
+            - /url: /projects/cmm6xcn6c0001wb1hccxo08u9
+          - link "Environments" [ref=e13] [cursor=pointer]:
+            - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/environments
+          - link "Secrets" [ref=e14] [cursor=pointer]:
+            - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/secrets
+          - link "Attractors" [ref=e15] [cursor=pointer]:
+            - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/attractors
+          - link "GitHub Issues" [ref=e16] [cursor=pointer]:
+            - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/github/issues
+          - link "PR Queue" [ref=e17] [cursor=pointer]:
+            - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/github/pulls
+          - link "Runs" [ref=e18] [cursor=pointer]:
+            - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/runs
+    - generic [ref=e19]:
+      - banner [ref=e20]:
+        - generic [ref=e21]:
+          - link "Dashboard" [ref=e23] [cursor=pointer]:
+            - /url: /
+          - generic [ref=e24]:
+            - generic [ref=e25]: /
+            - link "Projects" [ref=e26] [cursor=pointer]:
+              - /url: /projects
+          - generic [ref=e27]:
+            - generic [ref=e28]: /
+            - link "Attractor Factory" [ref=e70] [cursor=pointer]:
+              - /url: /projects/cmm6xcn6c0001wb1hccxo08u9
+          - generic [ref=e30]:
+            - generic [ref=e31]: /
+            - link "Github" [ref=e32] [cursor=pointer]:
+              - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/github
+          - generic [ref=e33]:
+            - generic [ref=e34]: /
+            - link "Pulls" [ref=e140] [cursor=pointer]:
+              - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/github/pulls
+          - generic [ref=e141]:
+            - generic [ref=e142]: /
+            - generic [ref=e143]: "15"
+        - combobox [ref=e37] [cursor=pointer]:
+          - generic: Attractor Factory
+          - img [ref=e38]
+      - main [ref=e40]:
+        - generic [ref=e144]:
+          - generic [ref=e145]:
+            - generic [ref=e146]:
+              - 'heading "PR #15" [level=2] [ref=e147]'
+              - paragraph [ref=e148]: Fix transparent dropdown backgrounds in factory web
+            - link "Open in GitHub" [ref=e150] [cursor=pointer]:
+              - /url: https://github.com/wcraigjones/attractor-factory/pull/15
+          - generic [ref=e151]:
+            - generic [ref=e152]:
+              - generic [ref=e153]:
+                - heading "Read-Only Review Pack" [level=3] [ref=e154]
+                - paragraph [ref=e155]: This PR has no linked attractor run artifacts yet. Use GitHub diff and metadata for manual review.
+              - generic [ref=e156]:
+                - generic [ref=e157]:
+                  - generic [ref=e158]: high
+                  - generic [ref=e159]: Pending
+                  - generic [ref=e160]: Head SHA a51c3556fb4f
+                  - generic [ref=e161]: Due 3/1/2026, 3:20:24 PM
+                - paragraph [ref=e162]: "## Summary - Add missing `popover` color mapping to `tailwind.config.ts` so the `bg-popover` class used by the Radix Select component actually resolves to an opaque white background - Fixes dropdown menus across the app (Attractors, Environments, Secrets pages) where form labels and input values were visibly bleeding through the transparent dropdown overlay ## Test plan - [ ] Open Global Attractors page and verify Reasoning, Default Run Type, and Status dropdowns have solid white backgrounds - [ ] Open Global Environments page and verify Status dropdown has solid white background - [ ] Open Global Secrets page and verify Provider dropdown has solid white background 🤖 Generated with [Claude Code](https://claude.com/claude-code)"
+            - generic [ref=e163]:
+              - heading "Actions" [level=3] [ref=e165]
+              - link "Review in GitHub" [ref=e167] [cursor=pointer]:
+                - /url: https://github.com/wcraigjones/attractor-factory/pull/15
+  - region "Notifications alt+T"
+  - generic "factory-version" [ref=e69]: version unknown

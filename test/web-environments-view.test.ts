@@ -10,6 +10,7 @@ function environment(input: Partial<Environment> & Pick<Environment, "id" | "nam
     kind: "KUBERNETES_JOB",
     runnerImage:
       "ghcr.io/example/runner@sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    setupScript: null,
     serviceAccountName: null,
     resourcesJson: null,
     active: input.active ?? true,

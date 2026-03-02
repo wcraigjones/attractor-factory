@@ -19,9 +19,12 @@ function riskVariant(risk: "low" | "medium" | "high"): "secondary" | "warning" |
   return "secondary";
 }
 
-function statusVariant(status: "Pending" | "Completed" | "Overdue"): "secondary" | "success" | "destructive" {
+function statusVariant(status: "Pending" | "Completed" | "Overdue" | "Stale"): "secondary" | "success" | "destructive" | "warning" {
   if (status === "Completed") {
     return "success";
+  }
+  if (status === "Stale") {
+    return "warning";
   }
   if (status === "Overdue") {
     return "destructive";
@@ -75,7 +78,7 @@ export function ProjectGitHubPrQueuePage() {
       <Card>
         <CardHeader>
           <CardTitle>Pull Requests</CardTitle>
-          <CardDescription>Open PRs sorted by open time with linked run/review context.</CardDescription>
+          <CardDescription>Open PRs sorted by open time with linked review-run state and stale detection.</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -118,13 +121,15 @@ export function ProjectGitHubPrQueuePage() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    {row.openPackPath ? (
+                    {row.openPackPath && !row.stale ? (
                       <Button asChild size="sm" variant="outline">
                         <Link to={row.openPackPath}>Open Pack</Link>
                       </Button>
                     ) : (
                       <Button asChild size="sm" variant="outline">
-                        <Link to={`/projects/${projectId}/github/pulls/${row.pullRequest.prNumber}`}>Read-Only Pack</Link>
+                        <Link to={`/projects/${projectId}/github/pulls/${row.pullRequest.prNumber}`}>
+                          {row.stale ? "Re-run Review" : "Run Review"}
+                        </Link>
                       </Button>
                     )}
                   </TableCell>

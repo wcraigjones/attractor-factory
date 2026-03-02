@@ -59,6 +59,35 @@ The codergen handler takes a backend that conforms to the `CodergenBackend` inte
 
 Attractor pipelines are driven by an event stream (Section 9.6). TUI, web, and IDE frontends consume events and submit human-in-the-loop answers. The pipeline engine is headless; the presentation layer is separate.
 
+### 1.5 Task Templates and Triggered Runs (Control Plane Concept)
+
+Attractor's DOT engine defines how a run executes, but not when a run should be started. A control plane can layer a **task template** concept on top of this spec to standardize reusable execution entry points.
+
+A task template is a saved launch configuration that references an attractor definition and runtime defaults, for example:
+
+- `name`
+- `description`
+- `attractorDefId` or pinned attractor version
+- `runType` (such as `task`, `planning`, `implementation`)
+- `sourceBranch` and `targetBranch` strategy
+- optional environment/model overrides
+- optional input payload mapping (for event-driven context)
+
+Task templates support three invocation modes:
+
+- **On demand (manual):** started explicitly by a user or API call.
+- **Periodic (scheduled):** started by a scheduler (for example hourly, daily, weekly).
+- **Event-triggered:** started by external events such as:
+  - GitHub pull request merged
+  - GitHub issue opened
+  - GitHub pull request opened or synchronized
+
+Event-triggered templates should support filters so only relevant events launch runs (for example branch filters, label filters, or repository scope filters).
+
+To avoid duplicate launches from webhook retries or sync replay, implementations should include idempotency keys derived from event identity (for example provider + event id + template id).
+
+This concept is intentionally outside the DOT DSL itself: templates choose **which graph to run** and **when to run it**, while this specification governs **how the selected graph executes** once queued.
+
 ---
 
 ## 2. DOT DSL Schema

@@ -109,6 +109,7 @@ function normalizeSnapshot(value: unknown): RunExecutionEnvironment | null {
     name?: unknown;
     kind?: unknown;
     runnerImage?: unknown;
+    setupScript?: unknown;
     serviceAccountName?: unknown;
     resources?: unknown;
   };
@@ -127,6 +128,7 @@ function normalizeSnapshot(value: unknown): RunExecutionEnvironment | null {
     name: snapshot.name,
     kind: "KUBERNETES_JOB",
     runnerImage: snapshot.runnerImage,
+    ...(typeof snapshot.setupScript === "string" ? { setupScript: snapshot.setupScript } : {}),
     ...(typeof snapshot.serviceAccountName === "string"
       ? { serviceAccountName: snapshot.serviceAccountName }
       : {}),
@@ -211,6 +213,7 @@ async function processRun(runId: string): Promise<void> {
       name: run.environment?.name ?? "legacy-default",
       kind: "KUBERNETES_JOB",
       runnerImage: run.environment?.runnerImage ?? RUNNER_FALLBACK_IMAGE,
+      ...(run.environment?.setupScript ? { setupScript: run.environment.setupScript } : {}),
       ...(run.environment?.serviceAccountName
         ? { serviceAccountName: run.environment.serviceAccountName }
         : {}),

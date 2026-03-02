@@ -1,0 +1,77 @@
+digraph pr_review_attractor {
+  graph [
+    goal="Review a synchronized GitHub pull request and produce a final review summary",
+    final_artifact_key="review-summary.md",
+    reviewer_artifact_nodes="reviewer_gpt53,reviewer_gemini,reviewer_sonnet",
+    final_output_node="review_summary"
+  ]
+
+  start [shape=Mdiamond, label="Start", type="start"]
+
+  review_council [
+    shape=component,
+    type="parallel",
+    label="Review Council",
+    prompt="Run all reviewer nodes in parallel using the repository snapshot and githubPullRequest context."
+  ]
+
+  reviewer_gpt53 [
+    shape=box,
+    type="codergen",
+    provider="openrouter",
+    model="openai/gpt-5.3-codex",
+    reasoning="high",
+    label="Reviewer: GPT-5.3 Codex",
+    prompt="You are an independent code reviewer for a pull request. Use githubPullRequest metadata, repositoryTree, and repositorySnapshot from context. Produce markdown with: 1) blocking findings, 2) non-blocking findings, 3) verification performed, 4) confidence. Keep findings actionable and file-specific."
+  ]
+
+  reviewer_gemini [
+    shape=box,
+    type="codergen",
+    provider="openrouter",
+    model="google/gemini-3.1-pro-preview",
+    reasoning="high",
+    label="Reviewer: Gemini 3.1 Pro",
+    prompt="You are an independent code reviewer for a pull request. Use githubPullRequest metadata, repositoryTree, and repositorySnapshot from context. Produce markdown with: 1) blocking findings, 2) non-blocking findings, 3) verification performed, 4) confidence. Keep findings actionable and file-specific."
+  ]
+
+  reviewer_sonnet [
+    shape=box,
+    type="codergen",
+    provider="openrouter",
+    model="anthropic/claude-sonnet-4.6",
+    reasoning="high",
+    label="Reviewer: Claude Sonnet 4.6",
+    prompt="You are an independent code reviewer for a pull request. Use githubPullRequest metadata, repositoryTree, and repositorySnapshot from context. Produce markdown with: 1) blocking findings, 2) non-blocking findings, 3) verification performed, 4) confidence. Keep findings actionable and file-specific."
+  ]
+
+  council_fan_in [
+    shape=tripleoctagon,
+    type="parallel.fan_in",
+    label="Council Fan-In"
+  ]
+
+  review_summary [
+    shape=box,
+    type="codergen",
+    provider="openrouter",
+    model="google/gemini-3.1-pro-preview",
+    reasoning="high",
+    label="Review Summary",
+    prompt="Synthesize the review_council outputs from parallelOutputs into one markdown summary with sections: Decision Recommendation, Blocking Findings, Non-Blocking Findings, Evidence, Follow-up Checklist, Residual Risk. Note reviewer disagreements explicitly."
+  ]
+
+  done [shape=Msquare, label="Done", type="exit"]
+
+  start -> review_council
+  review_council -> reviewer_gpt53 [label="gpt53"]
+  review_council -> reviewer_gemini [label="gemini"]
+  review_council -> reviewer_sonnet [label="sonnet"]
+
+  reviewer_gpt53 -> council_fan_in
+  reviewer_gemini -> council_fan_in
+  reviewer_sonnet -> council_fan_in
+
+  council_fan_in -> review_summary
+  review_summary -> done
+}

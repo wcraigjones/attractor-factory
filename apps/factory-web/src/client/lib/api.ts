@@ -1,4 +1,8 @@
 import type {
+  AgentAction,
+  AgentMessage,
+  AgentScope,
+  AgentSession,
   Artifact,
   ArtifactContentResponse,
   AttractorDef,
@@ -11,8 +15,10 @@ import type {
   GitHubAppStatus,
   GitHubIssue,
   GitHubInstallationRepo,
+  GitHubPullLaunchDefaults,
   GitHubPullQueueItem,
   GitHubPullRequest,
+  GlobalTaskTemplate,
   GlobalAttractor,
   GlobalSecret,
   Project,
@@ -23,6 +29,9 @@ import type {
   RunReviewChecklist,
   RunReviewResponse,
   RunModelConfig,
+  TaskTemplate,
+  TaskTemplateEventLedgerRecord,
+  TaskTemplateTriggerRule,
   SpecBundle
 } from "./types";
 
@@ -67,6 +76,11 @@ async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
 
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
+    if (response.status === 401 && typeof window !== "undefined") {
+      const returnTo = `${window.location.pathname}${window.location.search}`;
+      const safeReturnTo = returnTo.startsWith("/") ? returnTo : "/";
+      window.location.assign(`/auth/google/start?returnTo=${encodeURIComponent(safeReturnTo)}`);
+    }
     const errorMessage =
       typeof payload?.error === "string" ? payload.error : `${response.status} ${response.statusText}`;
     throw new Error(errorMessage);
@@ -81,6 +95,115 @@ export function artifactDownloadUrl(runId: string, artifactId: string): string {
 export async function listProjects(): Promise<Project[]> {
   const payload = await apiRequest<{ projects: Project[] }>("/api/projects");
   return payload.projects;
+}
+
+export async function updateProjectRedeployDefaults(
+  projectId: string,
+  input: {
+    redeployAttractorId?: string | null;
+    redeploySourceBranch?: string | null;
+    redeployTargetBranch?: string | null;
+    redeployEnvironmentId?: string | null;
+  }
+): Promise<Project> {
+  return apiRequest<Project>(`/api/projects/${projectId}/redeploy-defaults`, {
+    method: "PATCH",
+    body: JSON.stringify(input)
+  });
+}
+
+export async function listAgentSessions(input: {
+  scope: AgentScope;
+  projectId?: string;
+  limit?: number;
+}): Promise<AgentSession[]> {
+  const query = new URLSearchParams();
+  query.set("scope", input.scope);
+  if (input.projectId) {
+    query.set("projectId", input.projectId);
+  }
+  if (input.limit) {
+    query.set("limit", String(input.limit));
+  }
+  const payload = await apiRequest<{ sessions: AgentSession[] }>(
+    `/api/agent/sessions?${query.toString()}`
+  );
+  return payload.sessions;
+}
+
+export async function createAgentSession(input: {
+  scope: AgentScope;
+  projectId?: string;
+  title?: string;
+}): Promise<AgentSession> {
+  const payload = await apiRequest<{ session: AgentSession }>("/api/agent/sessions", {
+    method: "POST",
+    body: JSON.stringify(input)
+  });
+  return payload.session;
+}
+
+export async function getAgentSession(sessionId: string): Promise<AgentSession> {
+  const payload = await apiRequest<{ session: AgentSession }>(`/api/agent/sessions/${sessionId}`);
+  return payload.session;
+}
+
+export async function archiveAgentSession(sessionId: string): Promise<void> {
+  await apiRequest<unknown>(`/api/agent/sessions/${sessionId}`, {
+    method: "DELETE"
+  });
+}
+
+export async function listAgentSessionMessages(
+  sessionId: string,
+  limit?: number
+): Promise<{ messages: AgentMessage[]; actions: AgentAction[] }> {
+  const query = new URLSearchParams();
+  if (limit) {
+    query.set("limit", String(limit));
+  }
+  const suffix = query.toString() ? `?${query.toString()}` : "";
+  return apiRequest<{ messages: AgentMessage[]; actions: AgentAction[] }>(
+    `/api/agent/sessions/${sessionId}/messages${suffix}`
+  );
+}
+
+export async function postAgentMessage(
+  sessionId: string,
+  content: string
+): Promise<{
+  userMessage: AgentMessage;
+  assistantMessage: AgentMessage;
+  pendingActions: AgentAction[];
+}> {
+  return apiRequest<{
+    userMessage: AgentMessage;
+    assistantMessage: AgentMessage;
+    pendingActions: AgentAction[];
+  }>(`/api/agent/sessions/${sessionId}/messages`, {
+    method: "POST",
+    body: JSON.stringify({ content })
+  });
+}
+
+export async function approveAgentAction(
+  sessionId: string,
+  actionId: string
+): Promise<{ action: AgentAction; assistantMessage: AgentMessage }> {
+  return apiRequest<{ action: AgentAction; assistantMessage: AgentMessage }>(
+    `/api/agent/sessions/${sessionId}/actions/${actionId}/approve`,
+    { method: "POST" }
+  );
+}
+
+export async function rejectAgentAction(
+  sessionId: string,
+  actionId: string
+): Promise<{ action: AgentAction; assistantMessage: AgentMessage }> {
+  return apiRequest<{ action: AgentAction; assistantMessage: AgentMessage }>(
+    `/api/agent/sessions/${sessionId}/actions/${actionId}/reject`,
+    { method: "POST" }
+  );
 }
 
 export async function connectProjectRepo(
@@ -198,8 +321,35 @@ export async function listProjectGitHubPulls(
 export async function getProjectGitHubPull(
   projectId: string,
   prNumber: number
-): Promise<{ pull: GitHubPullQueueItem }> {
+): Promise<{ pull: GitHubPullQueueItem; launchDefaults: GitHubPullLaunchDefaults }> {
   return apiRequest(`/api/projects/${projectId}/github/pulls/${prNumber}`);
+}
+
+export async function launchPullRequestReviewRun(
+  projectId: string,
+  prNumber: number,
+  input: {
+    attractorDefId: string;
+    environmentId?: string;
+    sourceBranch?: string;
+    targetBranch?: string;
+  }
+): Promise<{
+  runId: string;
+  status: string;
+  sourceBranch: string;
+  targetBranch: string;
+  githubPullRequest: {
+    id: string;
+    prNumber: number;
+    url: string;
+    headSha: string;
+  } | null;
+}> {
+  return apiRequest(`/api/projects/${projectId}/github/pulls/${prNumber}/runs`, {
+    method: "POST",
+    body: JSON.stringify(input)
+  });
 }
 
 export async function launchIssueRun(
@@ -250,6 +400,7 @@ export async function createEnvironment(input: {
   name: string;
   kind?: "KUBERNETES_JOB";
   runnerImage: string;
+  setupScript?: string;
   serviceAccountName?: string;
   resourcesJson?: EnvironmentResources;
   active?: boolean;
@@ -265,6 +416,7 @@ export async function updateEnvironment(
   input: {
     name?: string;
     runnerImage?: string;
+    setupScript?: string | null;
     serviceAccountName?: string | null;
     resourcesJson?: EnvironmentResources | null;
     active?: boolean;
@@ -519,6 +671,163 @@ export async function updateProjectAttractor(
     {
       method: "PATCH",
       body: JSON.stringify(input)
+    }
+  );
+}
+
+export async function listGlobalTaskTemplates(): Promise<GlobalTaskTemplate[]> {
+  const payload = await apiRequest<{ templates: GlobalTaskTemplate[] }>("/api/task-templates/global");
+  return payload.templates;
+}
+
+export async function createGlobalTaskTemplate(input: {
+  name: string;
+  attractorName: string;
+  runType: "planning" | "implementation" | "task";
+  sourceBranch?: string;
+  targetBranch?: string;
+  environmentMode?: "PROJECT_DEFAULT" | "NAMED";
+  environmentName?: string | null;
+  scheduleEnabled?: boolean;
+  scheduleCron?: string | null;
+  scheduleTimezone?: string | null;
+  triggers?: TaskTemplateTriggerRule[];
+  description?: string | null;
+  active?: boolean;
+}): Promise<GlobalTaskTemplate> {
+  return apiRequest<GlobalTaskTemplate>("/api/task-templates/global", {
+    method: "POST",
+    body: JSON.stringify(input)
+  });
+}
+
+export async function getGlobalTaskTemplate(templateId: string): Promise<GlobalTaskTemplate> {
+  const payload = await apiRequest<{ template: GlobalTaskTemplate }>(`/api/task-templates/global/${templateId}`);
+  return payload.template;
+}
+
+export async function updateGlobalTaskTemplate(
+  templateId: string,
+  input: {
+    name?: string;
+    attractorName?: string;
+    runType?: "planning" | "implementation" | "task";
+    sourceBranch?: string | null;
+    targetBranch?: string | null;
+    environmentMode?: "PROJECT_DEFAULT" | "NAMED";
+    environmentName?: string | null;
+    scheduleEnabled?: boolean;
+    scheduleCron?: string | null;
+    scheduleTimezone?: string | null;
+    triggers?: TaskTemplateTriggerRule[];
+    description?: string | null;
+    active?: boolean;
+  }
+): Promise<GlobalTaskTemplate> {
+  const payload = await apiRequest<{ template: GlobalTaskTemplate }>(`/api/task-templates/global/${templateId}`, {
+    method: "PATCH",
+    body: JSON.stringify(input)
+  });
+  return payload.template;
+}
+
+export async function listProjectTaskTemplates(projectId: string): Promise<TaskTemplate[]> {
+  const payload = await apiRequest<{ templates: TaskTemplate[] }>(`/api/projects/${projectId}/task-templates`);
+  return payload.templates;
+}
+
+export async function createProjectTaskTemplate(
+  projectId: string,
+  input: {
+    name: string;
+    attractorName: string;
+    runType: "planning" | "implementation" | "task";
+    sourceBranch?: string;
+    targetBranch?: string;
+    environmentMode?: "PROJECT_DEFAULT" | "NAMED";
+    environmentName?: string | null;
+    scheduleEnabled?: boolean;
+    scheduleCron?: string | null;
+    scheduleTimezone?: string | null;
+    triggers?: TaskTemplateTriggerRule[];
+    description?: string | null;
+    active?: boolean;
+  }
+): Promise<TaskTemplate> {
+  const payload = await apiRequest<{ template: TaskTemplate }>(`/api/projects/${projectId}/task-templates`, {
+    method: "POST",
+    body: JSON.stringify(input)
+  });
+  return payload.template;
+}
+
+export async function getProjectTaskTemplate(projectId: string, templateId: string): Promise<TaskTemplate> {
+  const payload = await apiRequest<{ template: TaskTemplate }>(
+    `/api/projects/${projectId}/task-templates/${templateId}`
+  );
+  return payload.template;
+}
+
+export async function updateProjectTaskTemplate(
+  projectId: string,
+  templateId: string,
+  input: {
+    name?: string;
+    attractorName?: string;
+    runType?: "planning" | "implementation" | "task";
+    sourceBranch?: string | null;
+    targetBranch?: string | null;
+    environmentMode?: "PROJECT_DEFAULT" | "NAMED";
+    environmentName?: string | null;
+    scheduleEnabled?: boolean;
+    scheduleCron?: string | null;
+    scheduleTimezone?: string | null;
+    triggers?: TaskTemplateTriggerRule[];
+    description?: string | null;
+    active?: boolean;
+  }
+): Promise<TaskTemplate> {
+  const payload = await apiRequest<{ template: TaskTemplate }>(
+    `/api/projects/${projectId}/task-templates/${templateId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(input)
+    }
+  );
+  return payload.template;
+}
+
+export async function launchProjectTaskTemplateRun(
+  projectId: string,
+  templateId: string,
+  input?: { force?: boolean; specBundleId?: string }
+): Promise<{ runId: string; status: string }> {
+  return apiRequest<{ runId: string; status: string }>(
+    `/api/projects/${projectId}/task-templates/${templateId}/runs`,
+    {
+      method: "POST",
+      body: JSON.stringify(input ?? {})
+    }
+  );
+}
+
+export async function listProjectTaskTemplateEvents(
+  projectId: string
+): Promise<Array<TaskTemplateEventLedgerRecord & { taskTemplate?: { id: string; name: string; scope: string } }>> {
+  const payload = await apiRequest<{
+    events: Array<TaskTemplateEventLedgerRecord & { taskTemplate?: { id: string; name: string; scope: string } }>;
+  }>(`/api/projects/${projectId}/task-templates/events`);
+  return payload.events;
+}
+
+export async function replayProjectTaskTemplateEvent(
+  projectId: string,
+  eventId: string
+): Promise<{ runId: string; status: string }> {
+  return apiRequest<{ runId: string; status: string }>(
+    `/api/projects/${projectId}/task-templates/events/${eventId}/replay`,
+    {
+      method: "POST"
     }
   );
 }

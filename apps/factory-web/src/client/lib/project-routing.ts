@@ -15,5 +15,9 @@ export function pathForProjectSelection(pathname: string, projectId: string): st
     return `/projects/${projectId}/runs`;
   }
 
+  if (normalizedPath === "/chat" || normalizedPath.startsWith("/chat/")) {
+    return `/projects/${projectId}/chat`;
+  }
+
   return `/projects/${projectId}`;
 }

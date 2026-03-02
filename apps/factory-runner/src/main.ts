@@ -62,6 +62,7 @@ const minioClient = new S3Client({
   }
 });
 const MINIO_BUCKET = process.env.MINIO_BUCKET ?? "factory-artifacts";
+const SETUP_SCRIPT_OUTPUT_LIMIT = Number(process.env.SETUP_SCRIPT_OUTPUT_LIMIT ?? 12000);
 
 async function appendRunEvent(runId: string, type: string, payload: unknown): Promise<void> {
   const event = await prisma.runEvent.create({
@@ -633,6 +634,69 @@ async function runCommand(
     maxBuffer: 10 * 1024 * 1024
   });
   return `${result.stdout ?? ""}${result.stderr ?? ""}`;
+}
+
+function normalizeCommandOutput(value: unknown): string {
+  if (typeof value === "string") {
+    return value;
+  }
+  if (Buffer.isBuffer(value)) {
+    return value.toString("utf8");
+  }
+  return "";
+}
+
+function commandOutputFromError(error: unknown): string {
+  if (!error || typeof error !== "object") {
+    return "";
+  }
+  const payload = error as { stdout?: unknown; stderr?: unknown };
+  return `${normalizeCommandOutput(payload.stdout)}${normalizeCommandOutput(payload.stderr)}`;
+}
+
+function trimOutputTail(value: string, maxChars: number): string {
+  if (value.length <= maxChars) {
+    return value;
+  }
+  return value.slice(value.length - maxChars);
+}
+
+async function runEnvironmentSetupScript(args: {
+  runId: string;
+  workDir: string;
+  environment: RunExecutionEnvironment;
+}): Promise<void> {
+  const setupScript = args.environment.setupScript?.trim();
+  if (!setupScript) {
+    return;
+  }
+
+  const startedAt = Date.now();
+  await appendRunEvent(args.runId, "EnvironmentSetupStarted", {
+    runId: args.runId,
+    environmentId: args.environment.id,
+    environmentName: args.environment.name
+  });
+
+  try {
+    const output = await runCommand("bash", ["-lc", setupScript], args.workDir);
+    await appendRunEvent(args.runId, "EnvironmentSetupCompleted", {
+      runId: args.runId,
+      durationMs: Date.now() - startedAt,
+      outputTail: trimOutputTail(output, SETUP_SCRIPT_OUTPUT_LIMIT)
+    });
+  } catch (error) {
+    const output = commandOutputFromError(error);
+    await appendRunEvent(args.runId, "EnvironmentSetupFailed", {
+      runId: args.runId,
+      durationMs: Date.now() - startedAt,
+      outputTail: trimOutputTail(output, SETUP_SCRIPT_OUTPUT_LIMIT),
+      message: error instanceof Error ? error.message : String(error)
+    });
+    throw new Error(
+      `Environment setup script failed: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
 }
 
 async function configureRepositoryGitIdentity(cwd: string): Promise<void> {
@@ -1496,6 +1560,15 @@ async function processTaskRun(args: {
   repoFullName: string;
   sourceBranch: string;
   targetBranch: string;
+  githubPullRequest: {
+    prNumber: number;
+    title: string;
+    body: string | null;
+    url: string;
+    headRefName: string;
+    headSha: string;
+    baseRefName: string;
+  } | null;
   workDir: string;
   attractorContent: string;
   modelConfig: RunModelConfig;
@@ -1547,6 +1620,7 @@ async function processTaskRun(args: {
     repository: args.repoFullName,
     sourceBranch: args.sourceBranch,
     targetBranch: args.targetBranch,
+    githubPullRequest: args.githubPullRequest,
     repositoryTree: snapshot.tree,
     repositorySnapshot: snapshot.content
   };
@@ -2096,6 +2170,12 @@ async function processRun(spec: RunExecutionSpec): Promise<void> {
   );
 
   try {
+    await runEnvironmentSetupScript({
+      runId: run.id,
+      workDir,
+      environment
+    });
+
     const attractorResolved = await loadAttractorContent({
       workDir,
       snapshot: {
@@ -2127,6 +2207,17 @@ async function processRun(spec: RunExecutionSpec): Promise<void> {
         repoFullName: run.project.repoFullName,
         sourceBranch: run.sourceBranch,
         targetBranch: run.targetBranch,
+        githubPullRequest: run.githubPullRequest
+          ? {
+              prNumber: run.githubPullRequest.prNumber,
+              title: run.githubPullRequest.title,
+              body: run.githubPullRequest.body,
+              url: run.githubPullRequest.url,
+              headRefName: run.githubPullRequest.headRefName,
+              headSha: run.githubPullRequest.headSha,
+              baseRefName: run.githubPullRequest.baseRefName
+            }
+          : null,
         workDir,
         attractorContent,
         modelConfig: spec.modelConfig,

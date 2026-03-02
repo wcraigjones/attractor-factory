@@ -6,8 +6,10 @@ import {
   effectiveReviewDecision,
   githubSyncConfigFromEnv,
   hasFeedbackText,
+  isReviewRunStale,
   issueTargetBranch,
   parseIssueNumbers,
+  pullReviewStatus,
   verifyGitHubWebhookSignature
 } from "../apps/factory-api/src/github-sync.js";
 
@@ -53,5 +55,18 @@ describe("github sync helpers", () => {
     expect(effectiveReviewDecision("APPROVE", true)).toBe("REQUEST_CHANGES");
     expect(effectiveReviewDecision("REJECT", true)).toBe("REJECT");
     expect(effectiveReviewDecision("APPROVE", false)).toBe("APPROVE");
+  });
+
+  it("marks reviews as stale when head sha changes", () => {
+    expect(isReviewRunStale({ currentHeadSha: "abc123", reviewedHeadSha: "abc123" })).toBe(false);
+    expect(isReviewRunStale({ currentHeadSha: "def456", reviewedHeadSha: "abc123" })).toBe(true);
+    expect(isReviewRunStale({ currentHeadSha: "def456", reviewedHeadSha: null })).toBe(false);
+  });
+
+  it("derives pull review status with stale precedence", () => {
+    expect(pullReviewStatus({ hasReview: true, stale: true, minutesRemaining: 120 })).toBe("Stale");
+    expect(pullReviewStatus({ hasReview: true, stale: false, minutesRemaining: 120 })).toBe("Completed");
+    expect(pullReviewStatus({ hasReview: false, stale: false, minutesRemaining: -1 })).toBe("Overdue");
+    expect(pullReviewStatus({ hasReview: false, stale: false, minutesRemaining: 30 })).toBe("Pending");
   });
 });

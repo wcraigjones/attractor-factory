@@ -23,4 +23,8 @@ describe("project routing helpers", () => {
     expect(pathForProjectSelection("/", "proj-b")).toBe("/projects/proj-b");
     expect(pathForProjectSelection("/projects", "proj-b")).toBe("/projects/proj-b");
   });
+
+  it("routes global chat to project chat when selecting a project", () => {
+    expect(pathForProjectSelection("/chat", "proj-b")).toBe("/projects/proj-b/chat");
+  });
 });

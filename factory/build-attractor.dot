@@ -1,0 +1,43 @@
+digraph build_attractor {
+  graph [
+    goal="Plan, build, and review a targeted repository change"
+    implementation_mode="dot"
+    implementation_patch_node="build"
+    implementation_summary_node="review"
+    final_output_node="review"
+    final_artifact_key="build-review.md"
+  ]
+
+  start [shape=Mdiamond, label="Start"]
+
+  plan [
+    shape=box,
+    label="Plan",
+    provider="openrouter",
+    model="openai/gpt-5.3-codex",
+    prompt="Create a concise implementation plan for the requested change. Include assumptions, impacted files, sequencing, and verification steps."
+  ]
+
+  build [
+    shape=box,
+    label="Build",
+    provider="openrouter",
+    model="openai/gpt-5.3-codex",
+    prompt="Implement the approved plan. Output a unified diff patch that can be applied with git apply."
+  ]
+
+  review [
+    shape=box,
+    label="Review",
+    provider="openrouter",
+    model="openai/gpt-5.3-codex",
+    prompt="Review the build output for correctness, regressions, and completeness. Produce a concise markdown summary with findings, risk callouts, and follow-ups."
+  ]
+
+  done [shape=Msquare, label="Done"]
+
+  start -> plan
+  plan -> build
+  build -> review
+  review -> done
+}

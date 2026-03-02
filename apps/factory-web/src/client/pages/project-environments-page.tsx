@@ -63,7 +63,7 @@ export function ProjectEnvironmentsPage() {
   }
 
   return (
-    <div>
+    <div className="mx-auto w-full max-w-7xl space-y-4">
       <PageTitle
         title="Project Environments"
         description={`Manage environment usage for ${project.name}`}
@@ -101,6 +101,10 @@ export function ProjectEnvironmentsPage() {
               <span className="text-muted-foreground">Runner:</span>{" "}
               <span className="mono text-xs">{defaultEnvironment?.runnerImage ?? "-"}</span>
             </p>
+            <p>
+              <span className="text-muted-foreground">Setup Script:</span>{" "}
+              {defaultEnvironment?.setupScript ? "configured" : "-"}
+            </p>
           </CardContent>
         </Card>
 
@@ -110,57 +114,61 @@ export function ProjectEnvironmentsPage() {
             <CardDescription>Only active environments can be selected as project defaults and run targets.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Runner Image</TableHead>
-                  <TableHead>Service Account</TableHead>
-                  <TableHead>Resources</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {activeEnvironments.map((environment) => (
-                  <TableRow key={environment.id}>
-                    <TableCell>{environment.name}</TableCell>
-                    <TableCell className="mono text-xs">{environment.runnerImage}</TableCell>
-                    <TableCell>{environment.serviceAccountName ?? "-"}</TableCell>
-                    <TableCell className="mono text-xs">
-                      req(cpu={environment.resourcesJson?.requests?.cpu ?? "-"},mem={environment.resourcesJson?.requests?.memory ?? "-"}){" "}
-                      lim(cpu={environment.resourcesJson?.limits?.cpu ?? "-"},mem={environment.resourcesJson?.limits?.memory ?? "-"})
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={environment.id === project.defaultEnvironmentId ? "success" : "secondary"}>
-                        {environment.id === project.defaultEnvironmentId ? "default" : "active"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setDefaultMutation.mutate(environment.id)}
-                          disabled={setDefaultMutation.isPending || environment.id === project.defaultEnvironmentId}
-                        >
-                          Use As Default
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={() => {
-                            setShellEnvironment(environment);
-                            setShellOpen(true);
-                          }}
-                        >
-                          Open Shell
-                        </Button>
-                      </div>
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Runner Image</TableHead>
+                    <TableHead>Setup</TableHead>
+                    <TableHead>Service Account</TableHead>
+                    <TableHead>Resources</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {activeEnvironments.map((environment) => (
+                    <TableRow key={environment.id}>
+                      <TableCell>{environment.name}</TableCell>
+                      <TableCell className="mono text-xs">{environment.runnerImage}</TableCell>
+                      <TableCell>{environment.setupScript ? "configured" : "-"}</TableCell>
+                      <TableCell>{environment.serviceAccountName ?? "-"}</TableCell>
+                      <TableCell className="mono text-xs">
+                        req(cpu={environment.resourcesJson?.requests?.cpu ?? "-"},mem={environment.resourcesJson?.requests?.memory ?? "-"}){" "}
+                        lim(cpu={environment.resourcesJson?.limits?.cpu ?? "-"},mem={environment.resourcesJson?.limits?.memory ?? "-"})
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={environment.id === project.defaultEnvironmentId ? "success" : "secondary"}>
+                          {environment.id === project.defaultEnvironmentId ? "default" : "active"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setDefaultMutation.mutate(environment.id)}
+                            disabled={setDefaultMutation.isPending || environment.id === project.defaultEnvironmentId}
+                          >
+                            Use As Default
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              setShellEnvironment(environment);
+                              setShellOpen(true);
+                            }}
+                          >
+                            Open Shell
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       </div>

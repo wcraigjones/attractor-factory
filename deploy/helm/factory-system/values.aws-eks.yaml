@@ -1,0 +1,65 @@
+namespace: factory-system
+
+web:
+  apiBaseUrl: /api
+
+ingress:
+  enabled: true
+  className: alb
+  host: factory.pelx.ai
+  webPathPrefix: /
+  apiPathPrefix: /api
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/group.name: factory-system
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    alb.ingress.kubernetes.io/healthcheck-path: /healthz
+    alb.ingress.kubernetes.io/certificate-arn: ""
+
+postgres:
+  storage: 50Gi
+  storageClassName: gp3
+
+redis:
+  storage: 8Gi
+  storageClassName: gp3
+
+minio:
+  storage: 100Gi
+  storageClassName: gp3
+
+resources:
+  api:
+    requests: { cpu: 500m, memory: 1Gi }
+    limits: { cpu: 2, memory: 2Gi }
+  web:
+    requests: { cpu: 250m, memory: 256Mi }
+    limits: { cpu: 1, memory: 1Gi }
+  controller:
+    requests: { cpu: 400m, memory: 512Mi }
+    limits: { cpu: 2, memory: 2Gi }
+  postgres:
+    requests: { cpu: 500m, memory: 1Gi }
+    limits: { cpu: 2, memory: 4Gi }
+  redis:
+    requests: { cpu: 250m, memory: 512Mi }
+    limits: { cpu: 1, memory: 2Gi }
+  minio:
+    requests: { cpu: 500m, memory: 1Gi }
+    limits: { cpu: 2, memory: 4Gi }
+
+hpa:
+  api:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    cpuUtilization: 70
+    memoryUtilization: 80
+  web:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    cpuUtilization: 70
+    memoryUtilization: 80

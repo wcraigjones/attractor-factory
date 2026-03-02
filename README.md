@@ -30,6 +30,7 @@ codeagent> Implement Attractor as described by https://github.com/strongdm/attra
 - `prisma/`: Postgres schema + initial migration
 - `factory/self-bootstrap.dot`: baseline self-factory pipeline definition
 - `factory/task-review-framework.dot`: review loop template (summary/critical/artifacts/checklist/decision)
+- `factory/pr-review-attractor.dot`: PR review attractor (`review_council -> review_summary`)
 - `scripts/`: local image build, OrbStack deploy, and self-bootstrap helpers
 
 ## Local Setup
@@ -40,6 +41,18 @@ npm run prisma:generate
 npm run check-types
 npm run test
 ```
+
+## Docker Dev/Test Setup
+
+Use the Docker-based workspace (includes Postgres/Redis/MinIO and headless Playwright support) for reproducible local testing:
+
+```bash
+docker build -f Dockerfile.dev -t attractor-dev:local .
+./scripts/docker/start-dev-deps.sh
+./scripts/docker/workspace-shell.sh
+```
+
+Full guide: [docs/docker-dev.md](./docs/docker-dev.md)
 
 ## Conformance Suite
 
@@ -85,6 +98,18 @@ The deploy script installs Traefik, applies the factory ingress, and prints dire
 Provider API keys are not required to install or open the UI. The factory boots keyless and you add project-scoped provider keys later from the Web UI (`Project Secrets` page).
 The secrets UI and API also support arbitrary key/value secrets that are not tied to an AI provider mapping.
 
+Optional Google SSO access gate:
+
+- Factory stays open if all auth vars below are unset/empty.
+- Factory enables Google login gate when all are set:
+  - `FACTORY_AUTH_GOOGLE_CLIENT_ID`
+  - `FACTORY_AUTH_GOOGLE_CLIENT_SECRET`
+  - `FACTORY_AUTH_ALLOWED_DOMAIN` (for example `pelicandynamics.com`; subdomains allowed)
+  - `FACTORY_AUTH_SESSION_SECRET`
+- Partial configuration is rejected at startup (all-or-none).
+- With auth enabled, unauthenticated API requests return `401 {"error":"authentication required"}`.
+- Public unauthenticated exceptions in enabled mode: `GET /healthz`, `POST /api/github/webhooks`.
+
 Global shared secrets are also supported from the Web UI (`Global Secrets` page). Global secrets are replicated into each project namespace, and project secrets override global secrets for the same provider.
 
 Global attractors are also supported from the Web UI (`Global Attractors` page). Global attractors are synced into each project, and project attractors with the same name override global attractors in project views and run selection.
@@ -96,12 +121,14 @@ Web route map:
 - `/environments/global`
 - `/attractors/global`
 - `/attractors/global/:attractorId`
+- `/task-templates/global`
 - `/secrets/global`
 - `/projects/:projectId`
 - `/projects/:projectId/environments`
 - `/projects/:projectId/secrets`
 - `/projects/:projectId/attractors`
 - `/projects/:projectId/attractors/:attractorId`
+- `/projects/:projectId/task-templates`
 - `/projects/:projectId/github/issues`
 - `/projects/:projectId/github/issues/:issueNumber`
 - `/projects/:projectId/github/pulls`
@@ -109,6 +136,21 @@ Web route map:
 - `/projects/:projectId/runs`
 - `/runs/:runId`
 - `/runs/:runId/artifacts/:artifactId`
+- `/auth/google/start` (when auth is enabled)
+- `/auth/google/callback` (when auth is enabled)
+- `/auth/logout` (when auth is enabled)
+
+## Task Templates (Concept)
+
+Task templates are reusable run launch definitions layered on top of attractors. A template captures defaults such as run type, branch strategy, environment/model overrides, and input mapping.
+
+Templates can be launched in three ways:
+
+- On demand (manual run now)
+- Periodically (scheduled runs)
+- Event-triggered (for example when a GitHub PR is merged or an issue is opened)
+
+Event-triggered templates should use filters and idempotency keys so webhook retries or replayed sync events do not enqueue duplicate runs.
 
 ## Self-Bootstrap Run
 
@@ -157,6 +199,12 @@ API_BASE_URL=http://<traefik-ip>/api \
 npm run self:cycle
 ```
 
+Install the built-in PR review attractor template:
+
+```bash
+API_BASE_URL=http://<traefik-ip>/api npm run attractor:pr-review
+```
+
 ## LLM Runtime
 
 Attractor now mandates [`@mariozechner/pi-ai`](https://github.com/badlogic/pi-mono/tree/main/packages/ai) as the only LLM runtime layer for node execution. No direct provider SDK imports are used in source modules.
@@ -189,6 +237,10 @@ Implemented endpoints:
 - `PATCH /api/attractors/global/{attractorId}`
 - `GET /api/attractors/global/{attractorId}/versions`
 - `GET /api/attractors/global/{attractorId}/versions/{version}`
+- `POST /api/task-templates/global`
+- `GET /api/task-templates/global`
+- `GET /api/task-templates/global/{templateId}`
+- `PATCH /api/task-templates/global/{templateId}`
 - `POST /api/projects`
 - `GET /api/projects`
 - `POST /api/projects/{projectId}/environment`
@@ -206,6 +258,7 @@ Implemented endpoints:
 - `POST /api/projects/{projectId}/github/issues/{issueNumber}/runs`
 - `GET /api/projects/{projectId}/github/pulls`
 - `GET /api/projects/{projectId}/github/pulls/{prNumber}`
+- `POST /api/projects/{projectId}/github/pulls/{prNumber}/runs`
 - `POST /api/projects/{projectId}/secrets`
 - `GET /api/projects/{projectId}/secrets`
 - `POST /api/projects/{projectId}/attractors`
@@ -214,6 +267,13 @@ Implemented endpoints:
 - `PATCH /api/projects/{projectId}/attractors/{attractorId}`
 - `GET /api/projects/{projectId}/attractors/{attractorId}/versions`
 - `GET /api/projects/{projectId}/attractors/{attractorId}/versions/{version}`
+- `POST /api/projects/{projectId}/task-templates`
+- `GET /api/projects/{projectId}/task-templates`
+- `GET /api/projects/{projectId}/task-templates/{templateId}`
+- `PATCH /api/projects/{projectId}/task-templates/{templateId}`
+- `POST /api/projects/{projectId}/task-templates/{templateId}/runs`
+- `GET /api/projects/{projectId}/task-templates/events`
+- `POST /api/projects/{projectId}/task-templates/events/{eventId}/replay`
 - `GET /api/projects/{projectId}/runs`
 - `POST /api/runs`
 - `POST /api/projects/{projectId}/self-iterate`
@@ -226,7 +286,7 @@ Implemented endpoints:
 - `PUT /api/runs/{runId}/review`
 - `POST /api/runs/{runId}/cancel`
 
-Environment images should be digest-pinned for immutable harness execution (for example `ghcr.io/org/runner@sha256:...`).
+Environment images must include a tag or digest (for example `ghcr.io/org/runner:latest` or `ghcr.io/org/runner@sha256:...`). Digest pins are recommended for immutable harness execution.
 
 ## Prisma
 

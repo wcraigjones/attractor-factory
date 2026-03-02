@@ -1,0 +1,60 @@
+# Required defaults (already set by scripts when not provided)
+AWS_PROFILE=ai-sandbox-administrator
+AWS_REGION=us-west-2
+AWS_ACCOUNT_ID=582719176192
+
+# Stack/app identity
+STACK_PREFIX=attractor-factory
+CLUSTER_NAME=attractor-factory-eks
+NAMESPACE=factory-system
+
+# Domain and Route53
+DOMAIN_NAME=factory.pelx.ai
+HOSTED_ZONE_NAME=pelx.ai
+
+# CloudFormation stack names (optional overrides)
+NETWORK_STACK_NAME=attractor-factory-network
+EKS_STACK_NAME=attractor-factory-eks
+ECR_STACK_NAME=attractor-factory-ecr
+CERT_STACK_NAME=attractor-factory-cert
+DNS_STACK_NAME=attractor-factory-dns
+
+# Image release tag (defaults to git short SHA, must be unique/immutable in ECR)
+IMAGE_TAG=dev-20260228
+
+# EKS sizing overrides (optional)
+NODE_MIN_SIZE=2
+NODE_DESIRED_SIZE=2
+NODE_MAX_SIZE=6
+KUBERNETES_VERSION=1.30
+
+# ALB controller / IRSA overrides (optional)
+ALB_CONTROLLER_CHART_VERSION=
+ALB_CONTROLLER_IAM_POLICY_VERSION=v2.8.2
+ALB_CONTROLLER_NAMESPACE=kube-system
+ALB_CONTROLLER_SERVICE_ACCOUNT=aws-load-balancer-controller
+ALB_CONTROLLER_RELEASE_NAME=aws-load-balancer-controller
+ALB_CONTROLLER_POLICY_NAME=attractor-factory-AWSLoadBalancerControllerIAMPolicy
+ALB_CONTROLLER_ROLE_NAME=attractor-factory-aws-load-balancer-controller
+OIDC_THUMBPRINT=06b25927c42a721631c1efd9431e648fa62e1e39
+
+# EBS CSI addon overrides (optional)
+EBS_CSI_ADDON_NAME=aws-ebs-csi-driver
+EBS_CSI_ROLE_NAME=attractor-factory-ebs-csi-controller
+
+# Optional: enforce Google sign-in at ALB ingress (OIDC)
+# GCP project for this deployment: ai-hub-483804
+GOOGLE_OIDC_ENABLED=false
+GOOGLE_OIDC_CLIENT_ID=
+GOOGLE_OIDC_CLIENT_SECRET=
+GOOGLE_OIDC_SECRET_NAME=google-oidc
+GOOGLE_OIDC_SCOPE=openid email profile
+GOOGLE_OIDC_SESSION_TIMEOUT=3600
+GOOGLE_OIDC_AUTHORIZATION_ENDPOINT=https://accounts.google.com/o/oauth2/v2/auth
+GOOGLE_OIDC_TOKEN_ENDPOINT=https://oauth2.googleapis.com/token
+GOOGLE_OIDC_USER_INFO_ENDPOINT=https://openidconnect.googleapis.com/v1/userinfo
+GOOGLE_OIDC_ISSUER=https://accounts.google.com
+
+# Optional smoke-check run validation
+PROJECT_ID=
+ATTRACTOR_ID=

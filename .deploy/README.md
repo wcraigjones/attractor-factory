@@ -1,16 +1,37 @@
 # Deployment Runbooks
 
-This folder documents how Attractor Factory is deployed in two contexts:
+This folder contains authoritative deployment docs for Attractor Factory.
 
-1. Local development on Kubernetes (current implementation, supported now)
-2. Production on AWS ECS (target architecture and migration plan)
+## Current production path
 
-Files:
+- **AWS EKS + CloudFormation + Helm** (implemented in this repo)
 
-- [Local K8s](/Users/wcj/Projects/attractor/.deploy/local-k8s.md)
-- [Production ECS](/Users/wcj/Projects/attractor/.deploy/production-ecs.md)
+## Future path
 
-Status summary:
+- **AWS ECS/Fargate** (documented as a future phase; not the current runtime target)
 
-- Local K8s: implemented and script-driven via Helm + OrbStack.
-- ECS production: feasible, but requires runner-controller orchestration changes because current controller is Kubernetes Job-native.
+## Runbook index
+
+- [AWS EKS Architecture](./aws-eks-architecture.md)
+- [AWS EKS Runbook](./aws-eks-runbook.md)
+- [AWS Ops and Scaling](./aws-ops-and-scaling.md)
+- [AWS Troubleshooting](./aws-troubleshooting.md)
+- [AWS Env Contract](./aws-env.example)
+- [Local Kubernetes (OrbStack)](./local-k8s.md)
+- [Production ECS (Future Phase)](./production-ecs.md)
+
+## Quick start (AWS EKS)
+
+```bash
+./scripts/aws/deploy-all.sh
+```
+
+This orchestrates:
+
+1. AWS SSO login (`ai-sandbox-administrator`)
+2. CloudFormation stacks (network, EKS, ECR, ACM)
+3. AWS Load Balancer Controller install
+4. Image build and ECR push
+5. Helm deploy to EKS
+6. Route53 alias creation for `factory.pelx.ai`
+7. Post-deploy smoke checks

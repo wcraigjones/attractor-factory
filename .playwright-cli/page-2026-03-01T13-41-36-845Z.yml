@@ -1,0 +1,148 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e5]:
+        - paragraph [ref=e6]: Attractor
+        - heading "Factory" [level=1] [ref=e7]
+      - navigation [ref=e8]:
+        - link "Dashboard" [ref=e9] [cursor=pointer]:
+          - /url: /
+        - link "Projects" [ref=e10] [cursor=pointer]:
+          - /url: /projects
+        - generic [ref=e11]:
+          - link "Overview" [ref=e12] [cursor=pointer]:
+            - /url: /projects/cmm6xcn6c0001wb1hccxo08u9
+          - link "Environments" [ref=e13] [cursor=pointer]:
+            - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/environments
+          - link "Secrets" [ref=e14] [cursor=pointer]:
+            - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/secrets
+          - link "Attractors" [ref=e15] [cursor=pointer]:
+            - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/attractors
+          - link "GitHub Issues" [ref=e16] [cursor=pointer]:
+            - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/github/issues
+          - link "PR Queue" [ref=e17] [cursor=pointer]:
+            - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/github/pulls
+          - link "Runs" [ref=e18] [cursor=pointer]:
+            - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/runs
+    - generic [ref=e19]:
+      - banner [ref=e20]:
+        - generic [ref=e21]:
+          - link "Dashboard" [ref=e23] [cursor=pointer]:
+            - /url: /
+          - generic [ref=e24]:
+            - generic [ref=e25]: /
+            - link "Projects" [ref=e26] [cursor=pointer]:
+              - /url: /projects
+          - generic [ref=e27]:
+            - generic [ref=e28]: /
+            - link "Attractor Factory" [ref=e70] [cursor=pointer]:
+              - /url: /projects/cmm6xcn6c0001wb1hccxo08u9
+          - generic [ref=e30]:
+            - generic [ref=e31]: /
+            - link "Github" [ref=e32] [cursor=pointer]:
+              - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/github
+          - generic [ref=e33]:
+            - generic [ref=e34]: /
+            - generic [ref=e35]: Pulls
+        - combobox [ref=e37] [cursor=pointer]:
+          - generic: Attractor Factory
+          - img [ref=e38]
+      - main [ref=e40]:
+        - generic [ref=e41]:
+          - generic [ref=e42]:
+            - generic [ref=e43]:
+              - heading "PR Review Queue" [level=2] [ref=e44]
+              - paragraph [ref=e45]: SLA-prioritized queue for review packs generated from synchronized pull requests.
+            - button "Sync Now" [ref=e47] [cursor=pointer]
+          - generic [ref=e49]:
+            - heading "Compliance Rule" [level=3] [ref=e50]
+            - paragraph [ref=e51]: Any non-empty reviewer feedback is treated as a non-approval outcome (request changes unless explicitly reject).
+          - generic [ref=e52]:
+            - generic [ref=e53]:
+              - heading "Pull Requests" [level=3] [ref=e54]
+              - paragraph [ref=e55]: Open PRs sorted by open time with linked run/review context.
+            - table [ref=e58]:
+              - rowgroup [ref=e59]:
+                - row "PR Risk Status Critical Artifacts Due Action" [ref=e60]:
+                  - columnheader "PR" [ref=e61]
+                  - columnheader "Risk" [ref=e62]
+                  - columnheader "Status" [ref=e63]
+                  - columnheader "Critical" [ref=e64]
+                  - columnheader "Artifacts" [ref=e65]
+                  - columnheader "Due" [ref=e66]
+                  - columnheader "Action" [ref=e67]
+              - rowgroup [ref=e71]:
+                - row "#15 Fix transparent dropdown backgrounds in factory web high Pending 0 0 3/1/2026, 3:20:24 PM 459 min remaining Read-Only Pack" [ref=e72]:
+                  - cell "#15 Fix transparent dropdown backgrounds in factory web" [ref=e73]:
+                    - generic [ref=e74]:
+                      - paragraph [ref=e75]: "#15"
+                      - paragraph [ref=e76]: Fix transparent dropdown backgrounds in factory web
+                  - cell "high" [ref=e77]:
+                    - generic [ref=e78]: high
+                  - cell "Pending" [ref=e79]:
+                    - generic [ref=e80]: Pending
+                  - cell "0" [ref=e81]
+                  - cell "0" [ref=e82]
+                  - cell "3/1/2026, 3:20:24 PM 459 min remaining" [ref=e83]:
+                    - generic [ref=e84]:
+                      - paragraph [ref=e85]: 3/1/2026, 3:20:24 PM
+                      - paragraph [ref=e86]: 459 min remaining
+                  - cell "Read-Only Pack" [ref=e87]:
+                    - link "Read-Only Pack" [ref=e88] [cursor=pointer]:
+                      - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/github/pulls/15
+                - row "#14 [P0] Enforce planning lineage for self-iterate low Pending 0 0 3/1/2026, 2:38:50 PM 418 min remaining Read-Only Pack" [ref=e89]:
+                  - cell "#14 [P0] Enforce planning lineage for self-iterate" [ref=e90]:
+                    - generic [ref=e91]:
+                      - paragraph [ref=e92]: "#14"
+                      - paragraph [ref=e93]: "[P0] Enforce planning lineage for self-iterate"
+                  - cell "low" [ref=e94]:
+                    - generic [ref=e95]: low
+                  - cell "Pending" [ref=e96]:
+                    - generic [ref=e97]: Pending
+                  - cell "0" [ref=e98]
+                  - cell "0" [ref=e99]
+                  - cell "3/1/2026, 2:38:50 PM 418 min remaining" [ref=e100]:
+                    - generic [ref=e101]:
+                      - paragraph [ref=e102]: 3/1/2026, 2:38:50 PM
+                      - paragraph [ref=e103]: 418 min remaining
+                  - cell "Read-Only Pack" [ref=e104]:
+                    - link "Read-Only Pack" [ref=e105] [cursor=pointer]:
+                      - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/github/pulls/14
+                - row "#13 [P0] Make run dispatch idempotent and close cancel race low Pending 0 0 3/1/2026, 2:38:47 PM 418 min remaining Read-Only Pack" [ref=e106]:
+                  - cell "#13 [P0] Make run dispatch idempotent and close cancel race" [ref=e107]:
+                    - generic [ref=e108]:
+                      - paragraph [ref=e109]: "#13"
+                      - paragraph [ref=e110]: "[P0] Make run dispatch idempotent and close cancel race"
+                  - cell "low" [ref=e111]:
+                    - generic [ref=e112]: low
+                  - cell "Pending" [ref=e113]:
+                    - generic [ref=e114]: Pending
+                  - cell "0" [ref=e115]
+                  - cell "0" [ref=e116]
+                  - cell "3/1/2026, 2:38:47 PM 418 min remaining" [ref=e117]:
+                    - generic [ref=e118]:
+                      - paragraph [ref=e119]: 3/1/2026, 2:38:47 PM
+                      - paragraph [ref=e120]: 418 min remaining
+                  - cell "Read-Only Pack" [ref=e121]:
+                    - link "Read-Only Pack" [ref=e122] [cursor=pointer]:
+                      - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/github/pulls/13
+                - row "#12 [P0] Add run lifecycle reconciler for dispatched execution low Pending 0 0 3/1/2026, 2:38:36 PM 418 min remaining Read-Only Pack" [ref=e123]:
+                  - cell "#12 [P0] Add run lifecycle reconciler for dispatched execution" [ref=e124]:
+                    - generic [ref=e125]:
+                      - paragraph [ref=e126]: "#12"
+                      - paragraph [ref=e127]: "[P0] Add run lifecycle reconciler for dispatched execution"
+                  - cell "low" [ref=e128]:
+                    - generic [ref=e129]: low
+                  - cell "Pending" [ref=e130]:
+                    - generic [ref=e131]: Pending
+                  - cell "0" [ref=e132]
+                  - cell "0" [ref=e133]
+                  - cell "3/1/2026, 2:38:36 PM 418 min remaining" [ref=e134]:
+                    - generic [ref=e135]:
+                      - paragraph [ref=e136]: 3/1/2026, 2:38:36 PM
+                      - paragraph [ref=e137]: 418 min remaining
+                  - cell "Read-Only Pack" [ref=e138]:
+                    - link "Read-Only Pack" [ref=e139] [cursor=pointer]:
+                      - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/github/pulls/12
+  - region "Notifications alt+T"
+  - generic "factory-version" [ref=e69]: version unknown

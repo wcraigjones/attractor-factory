@@ -8,6 +8,7 @@ import {
   buildScopeOptions,
   GLOBAL_SCOPE_VALUE,
   isGlobalAttractorsPath,
+  isGlobalChatPath,
   isGlobalEnvironmentsPath,
   isGlobalSecretsPath,
   resolveSelectedScope,
@@ -175,6 +176,19 @@ export function AppShell() {
           {globalScopeSelected ? (
             <div className="mt-4 space-y-1 border-t border-border pt-4">
               <NavLink
+                to="/chat"
+                className={({ isActive }) =>
+                  cn(
+                    "block rounded-md px-3 py-2 text-sm",
+                    isActive || isGlobalChatPath(location.pathname)
+                      ? "bg-secondary text-secondary-foreground"
+                      : "text-muted-foreground hover:bg-muted"
+                  )
+                }
+              >
+                Chat
+              </NavLink>
+              <NavLink
                 to="/environments/global"
                 className={({ isActive }) =>
                   cn(
@@ -210,8 +224,21 @@ export function AppShell() {
                       : "text-muted-foreground hover:bg-muted"
                   )
                 }
-              >
+                >
                 Attractors
+              </NavLink>
+              <NavLink
+                to="/task-templates/global"
+                className={({ isActive }) =>
+                  cn(
+                    "block rounded-md px-3 py-2 text-sm",
+                    isActive
+                      ? "bg-secondary text-secondary-foreground"
+                      : "text-muted-foreground hover:bg-muted"
+                  )
+                }
+              >
+                Task Templates
               </NavLink>
             </div>
           ) : selectedProjectId ? (
@@ -219,9 +246,11 @@ export function AppShell() {
               {[
                 { to: `/projects/${selectedProjectId}`, label: "Overview" },
                 { to: `/projects/${selectedProjectId}/setup`, label: "Setup" },
+                { to: `/projects/${selectedProjectId}/chat`, label: "Chat" },
                 { to: `/projects/${selectedProjectId}/environments`, label: "Environments" },
                 { to: `/projects/${selectedProjectId}/secrets`, label: "Secrets" },
                 { to: `/projects/${selectedProjectId}/attractors`, label: "Attractors" },
+                { to: `/projects/${selectedProjectId}/task-templates`, label: "Task Templates" },
                 { to: `/projects/${selectedProjectId}/github/issues`, label: "GitHub Issues" },
                 { to: `/projects/${selectedProjectId}/github/pulls`, label: "PR Queue" },
                 { to: `/projects/${selectedProjectId}/runs`, label: "Runs" }

@@ -1,4 +1,28 @@
 export type RunType = "planning" | "implementation" | "task";
+export type TaskTemplateEnvironmentMode = "PROJECT_DEFAULT" | "NAMED";
+export type TaskTemplateLaunchMode = "MANUAL" | "SCHEDULE" | "EVENT" | "REPLAY";
+export type TaskTemplateTriggerEvent =
+  | "GITHUB_ISSUE_OPENED"
+  | "GITHUB_ISSUE_REOPENED"
+  | "GITHUB_ISSUE_LABELED"
+  | "GITHUB_ISSUE_COMMENT_CREATED"
+  | "GITHUB_PR_OPENED"
+  | "GITHUB_PR_SYNCHRONIZE"
+  | "GITHUB_PR_MERGED"
+  | "GITHUB_PR_REVIEW_CHANGES_REQUESTED"
+  | "GITHUB_PR_REVIEW_COMMENT_CREATED";
+export type TaskTemplateBranchStrategy = "TEMPLATE_DEFAULT" | "ISSUE_BRANCH" | "PR_HEAD";
+
+export interface TaskTemplateTriggerRule {
+  id: string;
+  enabled: boolean;
+  event: TaskTemplateTriggerEvent;
+  branchStrategy: TaskTemplateBranchStrategy;
+  labelAny?: string[];
+  commentContainsAny?: string[];
+  baseBranchAny?: string[];
+  headBranchAny?: string[];
+}
 
 export type RunStatus =
   | "QUEUED"
@@ -34,6 +58,7 @@ export interface Environment {
   name: string;
   kind: EnvironmentKind;
   runnerImage: string;
+  setupScript: string | null;
   serviceAccountName: string | null;
   resourcesJson: EnvironmentResources | null;
   active: boolean;
@@ -83,6 +108,8 @@ export interface Run {
   id: string;
   projectId: string;
   attractorDefId: string;
+  taskTemplateId: string | null;
+  taskTemplateLaunchMode: TaskTemplateLaunchMode | null;
   attractorContentPath: string | null;
   attractorContentVersion: number | null;
   attractorContentSha256: string | null;
@@ -150,6 +177,68 @@ export interface GitHubSyncState {
   updatedAt: string;
 }
 
+export interface GlobalTaskTemplate {
+  id: string;
+  name: string;
+  attractorName: string;
+  runType: RunType;
+  sourceBranch: string | null;
+  targetBranch: string | null;
+  environmentMode: TaskTemplateEnvironmentMode;
+  environmentName: string | null;
+  scheduleEnabled: boolean;
+  scheduleCron: string | null;
+  scheduleTimezone: string | null;
+  triggersJson: TaskTemplateTriggerRule[] | null;
+  description: string | null;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TaskTemplate {
+  id: string;
+  projectId: string;
+  scope: "PROJECT" | "GLOBAL";
+  name: string;
+  attractorName: string;
+  runType: RunType;
+  sourceBranch: string | null;
+  targetBranch: string | null;
+  environmentMode: TaskTemplateEnvironmentMode;
+  environmentName: string | null;
+  scheduleEnabled: boolean;
+  scheduleCron: string | null;
+  scheduleTimezone: string | null;
+  scheduleNextRunAt: string | null;
+  scheduleLastRunAt: string | null;
+  scheduleLastError: string | null;
+  triggersJson: TaskTemplateTriggerRule[] | null;
+  description: string | null;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TaskTemplateEventLedgerRecord {
+  id: string;
+  projectId: string;
+  taskTemplateId: string;
+  runId: string | null;
+  eventName: string;
+  eventAction: string | null;
+  dedupeKey: string;
+  deliveryId: string | null;
+  entityType: string | null;
+  entityNumber: number | null;
+  matchedRuleIds: string[] | null;
+  payload: unknown;
+  status: string;
+  reason: string | null;
+  replayedAt: string | null;
+  createdAt: string;
+}
+
 export type RunQuestionStatus = "PENDING" | "ANSWERED" | "TIMEOUT";
 
 export interface RunQuestion {
@@ -193,6 +282,7 @@ export interface RunExecutionEnvironment {
   name: string;
   kind: EnvironmentKind;
   runnerImage: string;
+  setupScript?: string;
   serviceAccountName?: string;
   resources?: EnvironmentResources;
 }

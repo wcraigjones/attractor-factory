@@ -44,7 +44,9 @@
     "bootstrap:self": "./scripts/bootstrap-self.sh",
     "self:iterate": "./scripts/self-iterate.sh",
     "self:cycle": "./scripts/self-cycle.sh",
-    "attractor:security-council": "./scripts/upsert-security-review-council.sh"
+    "attractor:security-council": "./scripts/upsert-security-review-council.sh",
+    "attractor:pr-review": "./scripts/upsert-pr-review-attractor.sh",
+    "attractor:build": "./scripts/upsert-build-attractor.sh"
   },
   "engines": {
     "node": ">=20.0.0"

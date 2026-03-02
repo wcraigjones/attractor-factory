@@ -18,6 +18,7 @@ images:
   runner:
     repository: ghcr.io/wcraigjones/attractor-factory-runner
     tag: latest
+    digest: ""
   postgres:
     repository: postgres
     tag: "16"
@@ -31,11 +32,19 @@ images:
 service:
   api:
     port: 8080
+    annotations: {}
   web:
     port: 3000
+    annotations: {}
 
 web:
   apiBaseUrl: /api
+
+auth:
+  googleClientId: ""
+  googleClientSecret: ""
+  allowedDomain: ""
+  sessionSecret: ""
 
 github:
   appSlug: ""
@@ -50,6 +59,11 @@ shell:
   sessionTtlSeconds: 1800
   podReadyTimeoutSeconds: 90
 
+taskTemplateScheduler:
+  enabled: true
+  intervalSeconds: 30
+  batchSize: 50
+
 selfDeploy:
   runnerAccess:
     enabled: true
@@ -62,21 +76,26 @@ ingress:
   host: ""
   webPathPrefix: /
   apiPathPrefix: /api
+  annotations: {}
 
 postgres:
   user: postgres
   password: postgres
   database: factory
+  pgData: /var/lib/postgresql/data/pgdata
   storage: 10Gi
+  storageClassName: ""
 
 redis:
   storage: 2Gi
+  storageClassName: ""
 
 minio:
   accessKey: minioadmin
   secretKey: minioadmin
   bucket: factory-artifacts
   storage: 20Gi
+  storageClassName: ""
 
 resources:
   api:
@@ -97,3 +116,17 @@ resources:
   minio:
     requests: { cpu: 200m, memory: 256Mi }
     limits: { cpu: 1, memory: 1Gi }
+
+hpa:
+  api:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 10
+    cpuUtilization: 70
+    memoryUtilization: 80
+  web:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 10
+    cpuUtilization: 70
+    memoryUtilization: 80

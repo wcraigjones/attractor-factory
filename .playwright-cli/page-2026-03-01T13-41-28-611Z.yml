@@ -1,0 +1,77 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e5]:
+        - paragraph [ref=e6]: Attractor
+        - heading "Factory" [level=1] [ref=e7]
+      - navigation [ref=e8]:
+        - link "Dashboard" [ref=e9] [cursor=pointer]:
+          - /url: /
+        - link "Projects" [ref=e10] [cursor=pointer]:
+          - /url: /projects
+        - generic [ref=e11]:
+          - link "Overview" [ref=e12] [cursor=pointer]:
+            - /url: /projects/cmm6xcn6c0001wb1hccxo08u9
+          - link "Environments" [ref=e13] [cursor=pointer]:
+            - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/environments
+          - link "Secrets" [ref=e14] [cursor=pointer]:
+            - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/secrets
+          - link "Attractors" [ref=e15] [cursor=pointer]:
+            - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/attractors
+          - link "GitHub Issues" [ref=e16] [cursor=pointer]:
+            - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/github/issues
+          - link "PR Queue" [ref=e17] [cursor=pointer]:
+            - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/github/pulls
+          - link "Runs" [ref=e18] [cursor=pointer]:
+            - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/runs
+    - generic [ref=e19]:
+      - banner [ref=e20]:
+        - generic [ref=e21]:
+          - link "Dashboard" [ref=e23] [cursor=pointer]:
+            - /url: /
+          - generic [ref=e24]:
+            - generic [ref=e25]: /
+            - link "Projects" [ref=e26] [cursor=pointer]:
+              - /url: /projects
+          - generic [ref=e27]:
+            - generic [ref=e28]: /
+            - link "Project" [ref=e29] [cursor=pointer]:
+              - /url: /projects/cmm6xcn6c0001wb1hccxo08u9
+          - generic [ref=e30]:
+            - generic [ref=e31]: /
+            - link "Github" [ref=e32] [cursor=pointer]:
+              - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/github
+          - generic [ref=e33]:
+            - generic [ref=e34]: /
+            - generic [ref=e35]: Pulls
+        - combobox [ref=e37] [cursor=pointer]:
+          - img [ref=e38]
+      - main [ref=e40]:
+        - generic [ref=e41]:
+          - generic [ref=e42]:
+            - generic [ref=e43]:
+              - heading "PR Review Queue" [level=2] [ref=e44]
+              - paragraph [ref=e45]: SLA-prioritized queue for review packs generated from synchronized pull requests.
+            - button "Sync Now" [ref=e47] [cursor=pointer]
+          - generic [ref=e49]:
+            - heading "Compliance Rule" [level=3] [ref=e50]
+            - paragraph [ref=e51]: Any non-empty reviewer feedback is treated as a non-approval outcome (request changes unless explicitly reject).
+          - generic [ref=e52]:
+            - generic [ref=e53]:
+              - heading "Pull Requests" [level=3] [ref=e54]
+              - paragraph [ref=e55]: Open PRs sorted by open time with linked run/review context.
+            - generic [ref=e56]:
+              - table [ref=e58]:
+                - rowgroup [ref=e59]:
+                  - row "PR Risk Status Critical Artifacts Due Action" [ref=e60]:
+                    - columnheader "PR" [ref=e61]
+                    - columnheader "Risk" [ref=e62]
+                    - columnheader "Status" [ref=e63]
+                    - columnheader "Critical" [ref=e64]
+                    - columnheader "Artifacts" [ref=e65]
+                    - columnheader "Due" [ref=e66]
+                    - columnheader "Action" [ref=e67]
+                - rowgroup
+              - paragraph [ref=e68]: No synchronized pull requests yet.
+  - region "Notifications alt+T"
+  - generic "factory-version" [ref=e69]: version unknown

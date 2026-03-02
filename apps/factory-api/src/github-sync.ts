@@ -145,6 +145,36 @@ export function reviewSummaryMarkdown(input: {
 
 export type PrRiskLevel = "low" | "medium" | "high";
 
+export type PullReviewStatus = "Pending" | "Completed" | "Overdue" | "Stale";
+
+export function isReviewRunStale(input: {
+  currentHeadSha: string;
+  reviewedHeadSha?: string | null;
+}): boolean {
+  const reviewedHeadSha = (input.reviewedHeadSha ?? "").trim();
+  if (reviewedHeadSha.length === 0) {
+    return false;
+  }
+  return reviewedHeadSha !== input.currentHeadSha;
+}
+
+export function pullReviewStatus(input: {
+  hasReview: boolean;
+  stale: boolean;
+  minutesRemaining: number;
+}): PullReviewStatus {
+  if (input.stale) {
+    return "Stale";
+  }
+  if (input.hasReview) {
+    return "Completed";
+  }
+  if (input.minutesRemaining < 0) {
+    return "Overdue";
+  }
+  return "Pending";
+}
+
 export function inferPrRiskLevel(input: {
   title: string;
   body?: string | null;

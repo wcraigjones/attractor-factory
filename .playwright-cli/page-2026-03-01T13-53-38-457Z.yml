@@ -1,0 +1,214 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e5]:
+        - paragraph [ref=e6]: Attractor
+        - heading "Factory" [level=1] [ref=e7]
+      - navigation [ref=e8]:
+        - link "Dashboard" [ref=e9] [cursor=pointer]:
+          - /url: /
+        - link "Projects" [ref=e10] [cursor=pointer]:
+          - /url: /projects
+        - generic [ref=e11]:
+          - link "Overview" [ref=e12] [cursor=pointer]:
+            - /url: /projects/cmm6xcn6c0001wb1hccxo08u9
+          - link "Environments" [ref=e13] [cursor=pointer]:
+            - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/environments
+          - link "Secrets" [ref=e14] [cursor=pointer]:
+            - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/secrets
+          - link "Attractors" [ref=e15] [cursor=pointer]:
+            - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/attractors
+          - link "GitHub Issues" [ref=e16] [cursor=pointer]:
+            - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/github/issues
+          - link "PR Queue" [ref=e17] [cursor=pointer]:
+            - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/github/pulls
+          - link "Runs" [ref=e18] [cursor=pointer]:
+            - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/runs
+    - generic [ref=e19]:
+      - banner [ref=e20]:
+        - generic [ref=e21]:
+          - link "Dashboard" [ref=e23] [cursor=pointer]:
+            - /url: /
+          - generic [ref=e24]:
+            - generic [ref=e25]: /
+            - link "Projects" [ref=e26] [cursor=pointer]:
+              - /url: /projects
+          - generic [ref=e27]:
+            - generic [ref=e28]: /
+            - link "Attractor Factory" [ref=e43] [cursor=pointer]:
+              - /url: /projects/cmm6xcn6c0001wb1hccxo08u9
+          - generic [ref=e30]:
+            - generic [ref=e31]: /
+            - link "Attractors" [ref=e32] [cursor=pointer]:
+              - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/attractors
+          - generic [ref=e33]:
+            - generic [ref=e34]: /
+            - generic [ref=e35]: Cmm75e4uh001zs71imzh1oea5
+        - combobox [ref=e37] [cursor=pointer]:
+          - generic: Attractor Factory
+          - img [ref=e38]
+      - main [ref=e40]:
+        - generic [ref=e44]:
+          - generic [ref=e45]:
+            - generic [ref=e46]:
+              - 'heading "Project Task: Redeploy Factory Studio" [level=2] [ref=e47]'
+              - paragraph [ref=e48]: Project attractor editor/viewer
+            - generic [ref=e49]:
+              - link "Back" [ref=e50] [cursor=pointer]:
+                - /url: /projects/cmm6xcn6c0001wb1hccxo08u9/attractors
+              - button "Format Canonical" [ref=e51] [cursor=pointer]
+              - button "Save" [ref=e52] [cursor=pointer]
+          - generic [ref=e53]:
+            - generic [ref=e54]: Version 8
+            - generic [ref=e55]: 0 errors
+            - generic [ref=e56]: 0 warnings
+            - generic [ref=e57]: Storage-backed
+          - generic [ref=e58]:
+            - button "Editor" [ref=e59] [cursor=pointer]
+            - button "Viewer" [ref=e60] [cursor=pointer]
+          - generic [ref=e61]:
+            - generic [ref=e62]:
+              - generic [ref=e63]:
+                - heading "Visual Builder" [level=3] [ref=e64]
+                - paragraph [ref=e65]: Canvas-first editing with node/edge inspectors and advanced attribute JSON editors.
+              - generic [ref=e66]:
+                - img "Attractor graph preview" [ref=e68]:
+                  - generic [ref=e75] [cursor=pointer]:
+                    - generic [ref=e77]: build_image_assets
+                    - generic [ref=e78]: tool
+                  - generic [ref=e79] [cursor=pointer]:
+                    - generic [ref=e81]: deploy_image_assets
+                    - generic [ref=e82]: tool
+                  - generic [ref=e83] [cursor=pointer]:
+                    - generic [ref=e85]: done
+                    - generic [ref=e86]: exit
+                  - generic [ref=e87] [cursor=pointer]:
+                    - generic [ref=e89]: monitor_release
+                    - generic [ref=e90]: tool
+                  - generic [ref=e91] [cursor=pointer]:
+                    - generic [ref=e93]: start
+                    - generic [ref=e94]: start
+                - generic [ref=e95]:
+                  - generic [ref=e96]:
+                    - text: Node Actions
+                    - button "Add Node" [ref=e97] [cursor=pointer]
+                    - button "Delete Selected Node" [disabled]
+                  - generic [ref=e98]:
+                    - text: Add Edge
+                    - combobox [ref=e99] [cursor=pointer]:
+                      - generic: From node
+                      - img [ref=e100]
+                    - combobox [ref=e102] [cursor=pointer]:
+                      - generic: To node
+                      - img [ref=e103]
+                    - textbox "Edge label" [ref=e105]
+                    - button "Add Edge" [disabled]
+                    - button "Delete Selected Edge" [disabled]
+            - generic [ref=e106]:
+              - generic [ref=e107]:
+                - heading "Inspector" [level=3] [ref=e108]
+                - paragraph [ref=e109]: Metadata, typed fields, advanced JSON attributes, and version history.
+              - generic [ref=e110]:
+                - generic [ref=e111]:
+                  - text: Name
+                  - textbox [ref=e112]: "Project Task: Redeploy Factory"
+                - generic [ref=e113]:
+                  - text: Source Label (repoPath)
+                  - textbox [ref=e114]
+                - generic [ref=e115]:
+                  - text: Default Run Type
+                  - combobox [ref=e116] [cursor=pointer]:
+                    - generic: task
+                    - img [ref=e117]
+                - generic [ref=e119]:
+                  - text: Model Provider
+                  - textbox [ref=e120]: openai
+                - generic [ref=e121]:
+                  - text: Model ID
+                  - textbox [ref=e122]: gpt-5-codex
+                - generic [ref=e123]:
+                  - text: Reasoning
+                  - combobox [ref=e124] [cursor=pointer]:
+                    - generic: medium
+                    - img [ref=e125]
+                - generic [ref=e127]:
+                  - text: Status
+                  - combobox [ref=e128] [cursor=pointer]:
+                    - generic: Active
+                    - img [ref=e129]
+                - generic [ref=e131]:
+                  - text: Description
+                  - textbox [ref=e132]: Project-scoped task attractor for direct factory redeploy runs on the project environment.
+                - generic [ref=e133]:
+                  - text: Graph Attributes (JSON)
+                  - textbox [ref=e134]: "{ \"goal\": \"Build and push factory images/assets, deploy the release, and monitor rollout health.\" }"
+                  - button "Apply Graph Attr JSON" [ref=e135] [cursor=pointer]
+                - generic [ref=e136]:
+                  - paragraph [ref=e137]: Version History
+                  - table [ref=e139]:
+                    - rowgroup [ref=e140]:
+                      - row "Version Actions" [ref=e141]:
+                        - columnheader "Version" [ref=e142]
+                        - columnheader "Actions" [ref=e143]
+                    - rowgroup [ref=e144]:
+                      - row "v8 • 3/1/2026, 7:52:44 AM Diff Restore" [ref=e145]:
+                        - cell "v8 • 3/1/2026, 7:52:44 AM" [ref=e146]
+                        - cell "Diff Restore" [ref=e147]:
+                          - generic [ref=e148]:
+                            - button "Diff" [ref=e149] [cursor=pointer]
+                            - button "Restore" [ref=e150] [cursor=pointer]
+                      - row "v7 • 3/1/2026, 7:51:48 AM Diff Restore" [ref=e151]:
+                        - cell "v7 • 3/1/2026, 7:51:48 AM" [ref=e152]
+                        - cell "Diff Restore" [ref=e153]:
+                          - generic [ref=e154]:
+                            - button "Diff" [ref=e155] [cursor=pointer]
+                            - button "Restore" [ref=e156] [cursor=pointer]
+                      - row "v6 • 3/1/2026, 7:49:45 AM Diff Restore" [ref=e157]:
+                        - cell "v6 • 3/1/2026, 7:49:45 AM" [ref=e158]
+                        - cell "Diff Restore" [ref=e159]:
+                          - generic [ref=e160]:
+                            - button "Diff" [ref=e161] [cursor=pointer]
+                            - button "Restore" [ref=e162] [cursor=pointer]
+                      - row "v5 • 3/1/2026, 7:47:35 AM Diff Restore" [ref=e163]:
+                        - cell "v5 • 3/1/2026, 7:47:35 AM" [ref=e164]
+                        - cell "Diff Restore" [ref=e165]:
+                          - generic [ref=e166]:
+                            - button "Diff" [ref=e167] [cursor=pointer]
+                            - button "Restore" [ref=e168] [cursor=pointer]
+                      - row "v4 • 2/28/2026, 10:35:56 PM Diff Restore" [ref=e169]:
+                        - cell "v4 • 2/28/2026, 10:35:56 PM" [ref=e170]
+                        - cell "Diff Restore" [ref=e171]:
+                          - generic [ref=e172]:
+                            - button "Diff" [ref=e173] [cursor=pointer]
+                            - button "Restore" [ref=e174] [cursor=pointer]
+                      - row "v3 • 2/28/2026, 10:33:27 PM Diff Restore" [ref=e175]:
+                        - cell "v3 • 2/28/2026, 10:33:27 PM" [ref=e176]
+                        - cell "Diff Restore" [ref=e177]:
+                          - generic [ref=e178]:
+                            - button "Diff" [ref=e179] [cursor=pointer]
+                            - button "Restore" [ref=e180] [cursor=pointer]
+                      - row "v2 • 2/28/2026, 10:30:32 PM Diff Restore" [ref=e181]:
+                        - cell "v2 • 2/28/2026, 10:30:32 PM" [ref=e182]
+                        - cell "Diff Restore" [ref=e183]:
+                          - generic [ref=e184]:
+                            - button "Diff" [ref=e185] [cursor=pointer]
+                            - button "Restore" [ref=e186] [cursor=pointer]
+                      - row "v1 • 2/28/2026, 8:45:42 PM Diff Restore" [ref=e187]:
+                        - cell "v1 • 2/28/2026, 8:45:42 PM" [ref=e188]
+                        - cell "Diff Restore" [ref=e189]:
+                          - generic [ref=e190]:
+                            - button "Diff" [ref=e191] [cursor=pointer]
+                            - button "Restore" [ref=e192] [cursor=pointer]
+          - generic [ref=e193]:
+            - generic [ref=e194]:
+              - heading "Raw DOT" [level=3] [ref=e195]
+              - paragraph [ref=e196]: Advanced editor panel. Visual and text views both write canonical DOT.
+            - generic [ref=e199]: Loading...
+          - generic [ref=e200]:
+            - generic [ref=e201]:
+              - heading "Diagnostics" [level=3] [ref=e202]
+              - paragraph [ref=e203]: Parser and linter diagnostics from the current DOT content.
+            - paragraph [ref=e205]: No diagnostics.
+          - button "Run With This Attractor" [ref=e207] [cursor=pointer]
+  - region "Notifications alt+T"
+  - generic "factory-version" [ref=e42]: version unknown

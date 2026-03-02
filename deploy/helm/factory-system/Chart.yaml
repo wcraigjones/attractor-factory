@@ -1,6 +1,6 @@
 apiVersion: v2
 name: factory-system
-description: Attractor Factory system stack for local OrbStack Kubernetes
+description: Attractor Factory system stack for Kubernetes (local or AWS EKS)
 type: application
 version: 0.1.0
 appVersion: "0.1.0"

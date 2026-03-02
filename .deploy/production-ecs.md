@@ -1,5 +1,16 @@
 # Production Deployment: AWS ECS
 
+## Status
+
+**Future phase (not current production path).**
+
+Current implemented deployment target is **AWS EKS**:
+
+- [AWS EKS Architecture](./aws-eks-architecture.md)
+- [AWS EKS Runbook](./aws-eks-runbook.md)
+- [AWS Ops and Scaling](./aws-ops-and-scaling.md)
+- [AWS Troubleshooting](./aws-troubleshooting.md)
+
 ## Scope
 
 This document describes a production ECS deployment model for Factory.
@@ -34,6 +45,14 @@ Secrets:
 
 - AWS Secrets Manager for provider credentials and infra secrets
 - Injected into ECS task definitions via `secrets` mappings
+- Optional Google SSO gate (all-or-none):
+  - `FACTORY_AUTH_GOOGLE_CLIENT_ID`
+  - `FACTORY_AUTH_GOOGLE_CLIENT_SECRET`
+  - `FACTORY_AUTH_ALLOWED_DOMAIN`
+  - `FACTORY_AUTH_SESSION_SECRET`
+- If all four are unset, Factory remains open.
+- If partially configured, `factory-api`/`factory-web` should fail fast at startup.
+- With auth enabled, only `GET /healthz` and `POST /api/github/webhooks` remain public.
 
 Per-run execution:
 

@@ -180,6 +180,9 @@ spec:
           imagePullPolicy: {{ .Values.global.imagePullPolicy }}
           ports:
             - containerPort: 5432
+          env:
+            - name: PGDATA
+              value: {{ .Values.postgres.pgData | quote }}
           envFrom:
             - secretRef:
                 name: postgres-auth
@@ -193,6 +196,9 @@ spec:
         name: data
       spec:
         accessModes: ["ReadWriteOnce"]
+        {{- if .Values.postgres.storageClassName }}
+        storageClassName: {{ .Values.postgres.storageClassName | quote }}
+        {{- end }}
         resources:
           requests:
             storage: {{ .Values.postgres.storage }}
@@ -213,7 +219,7 @@ spec:
     app.kubernetes.io/name: redis
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: redis
   namespace: {{ include "factory.namespace" . }}
@@ -221,6 +227,7 @@ metadata:
     {{- include "factory.labels" . | nindent 4 }}
     app.kubernetes.io/name: redis
 spec:
+  serviceName: redis
   replicas: 1
   selector:
     matchLabels:
@@ -240,6 +247,20 @@ spec:
           args: ["--appendonly", "yes"]
           resources:
             {{- toYaml .Values.resources.redis | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- if .Values.redis.storageClassName }}
+        storageClassName: {{ .Values.redis.storageClassName | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.redis.storage }}
 ---
 apiVersion: v1
 kind: Service
@@ -300,6 +321,9 @@ spec:
         name: data
       spec:
         accessModes: ["ReadWriteOnce"]
+        {{- if .Values.minio.storageClassName }}
+        storageClassName: {{ .Values.minio.storageClassName | quote }}
+        {{- end }}
         resources:
           requests:
             storage: {{ .Values.minio.storage }}
@@ -313,7 +337,9 @@ metadata:
     {{- include "factory.labels" . | nindent 4 }}
     app.kubernetes.io/name: factory-api
 spec:
+  {{- if not .Values.hpa.api.enabled }}
   replicas: 1
+  {{- end }}
   selector:
     matchLabels:
       app.kubernetes.io/name: factory-api
@@ -342,7 +368,7 @@ spec:
             - name: DATABASE_URL
               value: "postgresql://{{ .Values.postgres.user }}:{{ .Values.postgres.password }}@postgres.{{ include "factory.namespace" . }}.svc.cluster.local:5432/{{ .Values.postgres.database }}"
             - name: RUNNER_IMAGE
-              value: "{{ .Values.images.runner.repository }}:{{ .Values.images.runner.tag }}"
+              value: "{{ include "factory.runnerImageRef" . }}"
             - name: GITHUB_APP_SLUG
               value: {{ .Values.github.appSlug | quote }}
             - name: GITHUB_APP_ID
@@ -359,6 +385,20 @@ spec:
               value: {{ .Values.shell.sessionTtlSeconds | quote }}
             - name: SHELL_POD_READY_TIMEOUT_SECONDS
               value: {{ .Values.shell.podReadyTimeoutSeconds | quote }}
+            - name: TASK_TEMPLATE_SCHEDULER_ENABLED
+              value: {{ .Values.taskTemplateScheduler.enabled | quote }}
+            - name: TASK_TEMPLATE_SCHEDULER_INTERVAL_SECONDS
+              value: {{ .Values.taskTemplateScheduler.intervalSeconds | quote }}
+            - name: TASK_TEMPLATE_SCHEDULER_BATCH_SIZE
+              value: {{ .Values.taskTemplateScheduler.batchSize | quote }}
+            - name: FACTORY_AUTH_GOOGLE_CLIENT_ID
+              value: {{ .Values.auth.googleClientId | quote }}
+            - name: FACTORY_AUTH_GOOGLE_CLIENT_SECRET
+              value: {{ .Values.auth.googleClientSecret | quote }}
+            - name: FACTORY_AUTH_ALLOWED_DOMAIN
+              value: {{ .Values.auth.allowedDomain | quote }}
+            - name: FACTORY_AUTH_SESSION_SECRET
+              value: {{ .Values.auth.sessionSecret | quote }}
             - name: MINIO_BUCKET
               value: {{ .Values.minio.bucket | quote }}
             - name: MINIO_ACCESS_KEY
@@ -381,6 +421,10 @@ metadata:
   namespace: {{ include "factory.namespace" . }}
   labels:
     {{- include "factory.labels" . | nindent 4 }}
+  {{- with .Values.service.api.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   selector:
     app.kubernetes.io/name: factory-api
@@ -398,7 +442,9 @@ metadata:
     {{- include "factory.labels" . | nindent 4 }}
     app.kubernetes.io/name: factory-web
 spec:
+  {{- if not .Values.hpa.web.enabled }}
   replicas: 1
+  {{- end }}
   selector:
     matchLabels:
       app.kubernetes.io/name: factory-web
@@ -422,6 +468,14 @@ spec:
               value: {{ default "" .Values.global.factoryVersion | quote }}
             - name: API_BASE_URL
               value: {{ .Values.web.apiBaseUrl | quote }}
+            - name: FACTORY_AUTH_GOOGLE_CLIENT_ID
+              value: {{ .Values.auth.googleClientId | quote }}
+            - name: FACTORY_AUTH_GOOGLE_CLIENT_SECRET
+              value: {{ .Values.auth.googleClientSecret | quote }}
+            - name: FACTORY_AUTH_ALLOWED_DOMAIN
+              value: {{ .Values.auth.allowedDomain | quote }}
+            - name: FACTORY_AUTH_SESSION_SECRET
+              value: {{ .Values.auth.sessionSecret | quote }}
           resources:
             {{- toYaml .Values.resources.web | nindent 12 }}
 ---
@@ -432,6 +486,10 @@ metadata:
   namespace: {{ include "factory.namespace" . }}
   labels:
     {{- include "factory.labels" . | nindent 4 }}
+  {{- with .Values.service.web.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   selector:
     app.kubernetes.io/name: factory-web
@@ -471,7 +529,7 @@ spec:
             - name: DATABASE_URL
               value: "postgresql://{{ .Values.postgres.user }}:{{ .Values.postgres.password }}@postgres.{{ include "factory.namespace" . }}.svc.cluster.local:5432/{{ .Values.postgres.database }}"
             - name: RUNNER_IMAGE
-              value: "{{ .Values.images.runner.repository }}:{{ .Values.images.runner.tag }}"
+              value: "{{ include "factory.runnerImageRef" . }}"
             - name: FACTORY_API_BASE_URL
               value: "http://factory-api.{{ include "factory.namespace" . }}.svc.cluster.local:{{ .Values.service.api.port }}"
             - name: GITHUB_APP_ID
@@ -497,6 +555,66 @@ spec:
           resources:
             {{- toYaml .Values.resources.controller | nindent 12 }}
 ---
+{{- if .Values.hpa.api.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: factory-api
+  namespace: {{ include "factory.namespace" . }}
+  labels:
+    {{- include "factory.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: factory-api
+  minReplicas: {{ .Values.hpa.api.minReplicas }}
+  maxReplicas: {{ .Values.hpa.api.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.hpa.api.cpuUtilization }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.hpa.api.memoryUtilization }}
+---
+{{- end }}
+{{- if .Values.hpa.web.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: factory-web
+  namespace: {{ include "factory.namespace" . }}
+  labels:
+    {{- include "factory.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: factory-web
+  minReplicas: {{ .Values.hpa.web.minReplicas }}
+  maxReplicas: {{ .Values.hpa.web.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.hpa.web.cpuUtilization }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.hpa.web.memoryUtilization }}
+---
+{{- end }}
 {{- if .Values.ingress.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -505,6 +623,10 @@ metadata:
   namespace: {{ include "factory.namespace" . }}
   labels:
     {{- include "factory.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   {{- if .Values.ingress.className }}
   ingressClassName: {{ .Values.ingress.className }}
