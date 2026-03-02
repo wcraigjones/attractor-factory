@@ -76,4 +76,17 @@ describe("scope selector helpers", () => {
     expect(scopeToPath(GLOBAL_SCOPE_VALUE)).toBe("/environments/global");
     expect(scopeToPath("proj-1")).toBe("/projects/proj-1");
   });
+
+  it("maps global scope to matching global resource when pathname is a project sub-route", () => {
+    expect(scopeToPath(GLOBAL_SCOPE_VALUE, "/projects/proj-1/secrets")).toBe("/secrets/global");
+    expect(scopeToPath(GLOBAL_SCOPE_VALUE, "/projects/proj-1/attractors")).toBe("/attractors/global");
+    expect(scopeToPath(GLOBAL_SCOPE_VALUE, "/projects/proj-1/environments")).toBe("/environments/global");
+    expect(scopeToPath(GLOBAL_SCOPE_VALUE, "/projects/proj-1/task-templates")).toBe("/task-templates/global");
+    expect(scopeToPath(GLOBAL_SCOPE_VALUE, "/projects/proj-1/chat")).toBe("/chat");
+  });
+
+  it("falls back to /environments/global when project sub-route has no global equivalent", () => {
+    expect(scopeToPath(GLOBAL_SCOPE_VALUE, "/projects/proj-1")).toBe("/environments/global");
+    expect(scopeToPath(GLOBAL_SCOPE_VALUE, "/projects/proj-1/runs")).toBe("/environments/global");
+  });
 });

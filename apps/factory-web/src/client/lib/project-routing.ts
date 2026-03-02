@@ -19,5 +19,18 @@ export function pathForProjectSelection(pathname: string, projectId: string): st
     return `/projects/${projectId}/chat`;
   }
 
+  if (normalizedPath.startsWith("/secrets/global")) {
+    return `/projects/${projectId}/secrets`;
+  }
+  if (normalizedPath.startsWith("/attractors/global")) {
+    return `/projects/${projectId}/attractors`;
+  }
+  if (normalizedPath.startsWith("/environments/global")) {
+    return `/projects/${projectId}/environments`;
+  }
+  if (normalizedPath.startsWith("/task-templates/global")) {
+    return `/projects/${projectId}/task-templates`;
+  }
+
   return `/projects/${projectId}`;
 }

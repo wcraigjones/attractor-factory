@@ -11,6 +11,7 @@ import {
   isGlobalChatPath,
   isGlobalEnvironmentsPath,
   isGlobalSecretsPath,
+  isGlobalTaskTemplatesPath,
   resolveSelectedScope,
   scopeToPath
 } from "../../lib/scope-selector";
@@ -112,6 +113,11 @@ export function AppShell() {
 
       if (part === "environments" && parts[index + 1] === "global") {
         items.push({ href: "/environments/global", label: "Global Environments" });
+        break;
+      }
+
+      if (part === "task-templates" && parts[index + 1] === "global") {
+        items.push({ href: "/task-templates/global", label: "Global Task Templates" });
         break;
       }
 
@@ -232,7 +238,7 @@ export function AppShell() {
                 className={({ isActive }) =>
                   cn(
                     "block rounded-md px-3 py-2 text-sm",
-                    isActive
+                    isActive || isGlobalTaskTemplatesPath(location.pathname)
                       ? "bg-secondary text-secondary-foreground"
                       : "text-muted-foreground hover:bg-muted"
                   )
@@ -301,7 +307,7 @@ export function AppShell() {
                   return;
                 }
                 if (value === GLOBAL_SCOPE_VALUE) {
-                  navigate(scopeToPath(value));
+                  navigate(scopeToPath(value, location.pathname));
                   return;
                 }
                 navigate(pathForProjectSelection(location.pathname, value));

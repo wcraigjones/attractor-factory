@@ -49,8 +49,19 @@ export function resolveSelectedScope(input: {
   return input.fallbackProjectId;
 }
 
-export function scopeToPath(scope: string): string {
+export function scopeToPath(scope: string, pathname?: string): string {
   if (scope === GLOBAL_SCOPE_VALUE) {
+    if (pathname) {
+      const projectSub = pathname.match(/^\/projects\/[^/]+\/(.+)/);
+      if (projectSub) {
+        const sub = projectSub[1];
+        if (sub.startsWith("secrets")) return "/secrets/global";
+        if (sub.startsWith("attractors")) return "/attractors/global";
+        if (sub.startsWith("environments")) return "/environments/global";
+        if (sub.startsWith("task-templates")) return "/task-templates/global";
+        if (sub.startsWith("chat")) return "/chat";
+      }
+    }
     return "/environments/global";
   }
   return `/projects/${scope}`;

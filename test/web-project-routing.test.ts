@@ -27,4 +27,11 @@ describe("project routing helpers", () => {
   it("routes global chat to project chat when selecting a project", () => {
     expect(pathForProjectSelection("/chat", "proj-b")).toBe("/projects/proj-b/chat");
   });
+
+  it("routes global resource paths to project equivalents", () => {
+    expect(pathForProjectSelection("/secrets/global", "proj-b")).toBe("/projects/proj-b/secrets");
+    expect(pathForProjectSelection("/attractors/global", "proj-b")).toBe("/projects/proj-b/attractors");
+    expect(pathForProjectSelection("/environments/global", "proj-b")).toBe("/projects/proj-b/environments");
+    expect(pathForProjectSelection("/task-templates/global", "proj-b")).toBe("/projects/proj-b/task-templates");
+  });
 });
