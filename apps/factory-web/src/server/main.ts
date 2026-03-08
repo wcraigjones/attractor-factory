@@ -24,7 +24,13 @@ if (isAuthEnabled(authConfig)) {
 }
 
 const currentDir = resolve(fileURLToPath(new URL(".", import.meta.url)));
-const clientDist = resolve(currentDir, "../client");
+const clientDistCandidates = [
+  resolve(currentDir, "../client"),
+  resolve(currentDir, "../../../../../client"),
+  resolve(process.cwd(), "apps/factory-web/dist/client"),
+  resolve(process.cwd(), "dist/client")
+];
+const clientDist = clientDistCandidates.find((candidate) => existsSync(candidate));
 
 function sendAuthChallenge(res: express.Response, config: AuthEnabledConfig): void {
   res.setHeader("WWW-Authenticate", buildWwwAuthenticateHeader(config));
@@ -64,7 +70,7 @@ app.get("/app-config.js", (_req, res) => {
   );
 });
 
-if (existsSync(clientDist)) {
+if (clientDist) {
   app.use(
     express.static(clientDist, {
       index: false,
