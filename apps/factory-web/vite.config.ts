@@ -6,7 +6,7 @@ import {
   buildWwwAuthenticateHeader,
   isAuthEnabled,
   resolveAuthConfig
-} from "@attractor/shared-auth";
+} from "../../packages/shared-auth/src/index";
 
 function factoryBasicAuthPlugin(): Plugin {
   const authConfig = resolveAuthConfig(process.env);
